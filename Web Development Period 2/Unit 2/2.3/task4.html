@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Color Clicker</title>
+  <style>
+    .clickbox {
+      width: 125px;
+      height: 125px;
+      background-color: #dedede;
+    }
+  </style>
+</head>
+<body>
+  <div class="clickbox"></div>
+
+  <script>
+    const box = document.querySelector(".clickbox");
+    box.addEventListener("click", () => {
+      if (box.style.backgroundColor === "darkred") 
+      {
+        box.style.backgroundColor = "#dedede";
+      } 
+      else 
+      {
+        box.style.backgroundColor = "darkred";
+      }
+    });
+  </script>
+</body>
+</html>

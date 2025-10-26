@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Font Size/Style Changer</title>
+</head>
+<body>
+  <p id="text">You can change the size and the color of this text thanks to the learning which has been happening over this lesson.</p>
+
+  <button id="bigger">+</button>
+  <button id="smaller">-</button>
+  <input id="pick" type="color" value="#000000">
+
+  <script>
+    let size = 16;
+    document.querySelector("#text").style.fontSize = size + "px";
+
+    document.querySelector("#bigger").onclick = function() {
+      size += 2;
+      document.querySelector("#text").style.fontSize = size + "px";
+    };
+
+    document.querySelector("#smaller").onclick = function() {
+      size -= 2;
+      if (size < 8) size = 8;
+      document.querySelector("#text").style.fontSize = size + "px";
+    };
+
+    document.querySelector("#pick").onclick =
+    document.querySelector("#pick").oninput = function() {
+      document.querySelector("#text").style.color = this.value;
+    };
+  </script>
+</body>
+</html>

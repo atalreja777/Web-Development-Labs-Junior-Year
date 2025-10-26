@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Word Counter</title>
+</head>
+<body>
+  <div>
+    <textarea id="text" rows="6" cols="60" placeholder="Type something..."></textarea>
+    <p>Word count: <span id="count">0</span></p>
+  </div>
+
+  <script>
+    document.querySelector("#text").oninput = function() {
+      let text = document.querySelector("#text").value.trim();
+      if (text === "") {
+        document.querySelector("#count").textContent = 0;
+      } 
+      else {
+        let words = text.split(" ");
+        document.querySelector("#count").textContent = words.length;
+      }
+    };
+  </script>
+</body>
+</html>

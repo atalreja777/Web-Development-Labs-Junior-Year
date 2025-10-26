@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Multiple Color Divs</title>
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 125px);
+      grid-template-rows: repeat(3, 125px);
+      gap: 10px;
+    }
+    .clickbox {
+      width: 125px;
+      height: 125px;
+      background-color: #dedede;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <div class="clickbox"></div>
+    <div class="clickbox"></div>
+    <div class="clickbox"></div>
+    <div class="clickbox"></div>
+    <div class="clickbox"></div>
+    <div class="clickbox"></div>
+    <div class="clickbox"></div>
+    <div class="clickbox"></div>
+    <div class="clickbox"></div>
+  </div>
+
+  <script>
+    let boxes = Array.from(document.querySelectorAll(".clickbox"));
+
+    for (let i = 0; i < boxes.length; i++) {
+      boxes[i].onclick = function() {
+        if (boxes[i].style.backgroundColor === "darkblue") 
+        {
+          boxes[i].style.backgroundColor = "#dedede";
+        } else 
+        {
+          boxes[i].style.backgroundColor = "darkblue";
+        }
+      };
+    }
+  </script>
+</body>
+</html>

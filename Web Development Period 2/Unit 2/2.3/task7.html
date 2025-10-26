@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Keypress Color Change</title>
+</head>
+<body>
+  <script>
+    document.body.onkeydown = function(ev) {
+      if (ev.key === "r") 
+      {
+        document.body.style.backgroundColor = "red";
+      } 
+      else if (ev.key === "b") {
+        document.body.style.backgroundColor = "blue";
+      } 
+      else if (ev.key === "g") {
+        document.body.style.backgroundColor = "green";
+      } 
+      else if (ev.key === "y") {
+        document.body.style.backgroundColor = "yellow";
+      } 
+      else {
+        document.body.style.backgroundColor = "white";
+      }
+    };
+  </script>
+</body>
+</html>

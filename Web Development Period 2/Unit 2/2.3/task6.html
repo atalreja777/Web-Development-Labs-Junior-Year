@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Naive Chatbot</title>
+</head>
+<body>
+  <div>
+    <input id="chatentered" type="text">
+    <button id="button">Send</button>
+  </div>
+  <div>
+    <p>Conversation</p>
+    <ul id="chat"></ul>
+  </div>
+
+  <script>
+    document.querySelector("#button").onclick = function() {
+      let input = document.querySelector("#chatentered");
+      if (input.value === "") return;
+
+      let chat = document.querySelector("#chat");
+
+      let userListElement = document.createElement("li");
+      userListElement.textContent = "This is the users message:" + input.value;
+      chat.appendChild(userListElement);
+
+      let botListElement = document.createElement("li");
+      botListElement.textContent = "Hello, my name is Arnav.ai, this is my response: OKKKKKKKKKKK!!!!";
+      chat.appendChild(botListElement);
+
+      input.value = "";
+    };
+  </script>
+</body>
+</html>

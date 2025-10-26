@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+p {
+   font-family: 'Montserrat', sans-serif;
+}
+
+header {
+  background-color: #d68325;
+  margin: 0;
+}
+
+header p {
+  margin: 0;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  justify-content: space-around;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  height: 35px;
+}
+
+nav ul a {
+  text-align: center;
+  font-size: x-large;
+  text-decoration: none;
+  color: black;
+}
+
+nav ul a:hover {
+  color: orange;
+}
+
+h1 {
+  color: black;
+  font-style: italic;
+  font-weight: 100;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+.titletop {
+  font-size: 40px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  text-align: center;
+}
+
+.titlebottom {
+  font-size: 25px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  text-align: center;
+}
+.aboutsite {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 0 15px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.aboutsite p {
+  flex: 1;
+  margin: 0;
+  text-align: left;
+}
+
+.aboutsite img {
+  max-width: 40%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+.titlecontainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.site-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
+.titletext {
+  text-align: center;
+}
+.describingdish{
+  text-align: left;
+  width: 35%;
+  padding-left: 20px;
+  display: flex;
+}
+.dishimage{
+
+  width: 40%;
+  height: auto;
+  border-radius: 10px;
+}
+.dishdiv{
+   display: flex;
+  justify-content: space-around;
+}
+main {
+  padding: 16px;
+}
+
+.ingredientlist h2,
+.instructionslist h2 {
+  margin-top: 0;
+  color: orangered;
+}
+
+.ingredientlist,
+.instructionslist {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+  background: white;
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border: orangered 2px;
+}
+
+.ingredientlist ul,
+.instructionslist ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.ingredientlist li,
+.instructionslist li {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 760px) {
+  .ingredientlist,
+  .instructionslist {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Temperature Converter</title>
+</head>
+<body>
+  <h1>Converting temperature from Fahrenheit to Celsius</h1>
+  <input id="tempF" type="number" placeholder="Fahrenheit Temp:">
+  <button id="button">Press Me</button>
+  <span id="converted"></span>
+
+  <script>
+    document.querySelector("#button").onclick = function() {
+      const typedNum = document.querySelector("#tempF");
+      const faren = parseFloat(typedNum.value);
+      if (isNaN(faren)) {
+        document.querySelector("#converted").textContent = "Please enter a number.";
+        return;
+      }
+      const cel = (faren - 32) * 5 / 9;
+      document.querySelector("#converted").textContent = cel.toFixed(1) + " °C";
+    };
+  </script>
+</body>
+</html>

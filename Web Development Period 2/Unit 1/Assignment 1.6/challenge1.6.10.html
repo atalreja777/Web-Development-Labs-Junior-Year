@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Challenge 1.6.10 - Styling a Form</title>
+  <style>
+    form {
+      border: 2px solid black;
+      padding: 15px;
+      width: 280px;
+      background-color: whitesmoke; 
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 6px;
+      margin-bottom: 12px;
+      border: 1px solid gray;
+      border-radius: 7px;
+    }
+
+    button {
+      background-color: black;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: gray;
+    }
+  </style>
+</head>
+<body>
+  <form>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name">
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email">
+
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Simple Stopwatch</title>
+</head>
+<body>
+  <h1>This is the Stopwatch that the assignment wanted to be created</h1>
+  <p id="display">0</p>
+  <button id="start">Start</button>
+  <button id="stop">Stop</button>
+  <button id="reset">Reset</button>
+
+  <script>
+    let ct = 0;
+    let timer = null;
+
+    document.querySelector("#start").onclick = function() {
+      if (timer === null) {
+        timer = setInterval(() => {
+          ct++;
+          document.querySelector("#display").textContent = ct;
+        }, 1000);
+      }
+    };
+
+    document.querySelector("#stop").onclick = function() {
+      clearInterval(timer);
+      timer = null;
+    };
+
+    document.querySelector("#reset").onclick = function() {
+      clearInterval(timer);
+      timer = null;
+      ct = 0;
+      document.querySelector("#display").textContent = ct;
+    };
+  </script>
+</body>
+</html>
