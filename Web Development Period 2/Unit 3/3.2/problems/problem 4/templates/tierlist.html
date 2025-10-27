@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="UTF-8"><title>Tier List Viewer</title></head>
+  <body>
+    <h1>Pokémon Tier List</h1>
+    <ul>
+      {% for pokemon in tier_list %}
+        <li>{{ pokemon }}</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

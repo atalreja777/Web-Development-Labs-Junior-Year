@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Schedule Viewer</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 10px; }
+      .blocks { display: flex; flex-wrap: wrap; gap: 14px; }
+      .block { border: 3px solid black; padding: 20px; }
+    </style>
+  </head>
+  <body>
+    <h1>This is the current schedule for the {{ day.day_type.name}}, happening on: {{ day.date }}</h1>
+
+    {% if day.day_type.special %}
+      <p>Special Schedule</p>
+    {% else %}
+      <p>Regular Schedule</p>
+    {% endif %}
+
+    <div class="blocks">
+      {% for b in day.day_type.blocks %}
+        <div class="block">
+          <p> This is for:{{ b.name }}</b></p>
+          <p>Starts at {{ b.start }} goes to {{ b.end }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
