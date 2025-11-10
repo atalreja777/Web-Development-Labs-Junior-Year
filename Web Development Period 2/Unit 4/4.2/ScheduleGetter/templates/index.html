@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <style type="text/css">
+    .schedule_container {
+      width: 50vh;
+      margin: auto;
+    }
+    .image_container > img {
+      width: 50vh;
+    }
+    .display_container {
+      display: block;
+      background-color: blue;
+    }
+    .lefty { float: left; }
+    .righty { float: right; }
+  </style>
+</head>
+<body>
+
+  <h3>Schedule Viewer</h3>
+  
+  <div class="schedule_container">
+     <input type="date" id="cal_picker">
+    <div class="display_container">
+         <div class="lefty">
+           <span id="schedule_disp">Placeholders</span>
+         </div>
+    </div>
+  </div>
+
+
+  <script>
+
+    const scheduleFetch =  async() => {
+
+        const response = await fetch('http://127.0.0.1/get_schedule_from_ion')
+        const data = await response.json()
+        console.log(data)
+        let counter_span = document.getElementById("schedule_disp")
+        counter_span.innerHTML = data.day_type.blocks;
+    }
+
+    document.querySelector('#cal_picker').onchange = scheduleFetch;
+    
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Site to showcase voting upward or downward</h1>
+<p>Upvotes: <span id="count-up">0</span></p>
+<p>Downvotes: <span id="count-down">0</span></p>
+
+<button id="upvote-btn">Upvote here</button>
+<button id="downvote-btn">Downvote here by selecting this</button>
+
+<script>
+    async function updateCounts() {
+        const res = await fetch('/total');
+        const data = await res.json();
+        document.getElementById('count-up').textContent = data.upvote;
+        document.getElementById('count-down').textContent = data.downvote;
+    }
+
+    document.getElementById('upvote-btn').onclick = async () => {
+        const res = await fetch('/votingupward');
+        const data = await res.json();
+        document.getElementById('count-up').textContent = data.upvote;
+        document.getElementById('count-down').textContent = data.downvote;
+    };
+
+    document.getElementById('downvote-btn').onclick = async () => {
+        const res = await fetch('/votingdownward');
+        const data = await res.json();
+        document.getElementById('count-up').textContent = data.upvote;
+        document.getElementById('count-down').textContent = data.downvote;
+    };
+
+    updateCounts();
+</script>
+</body>
+</html>

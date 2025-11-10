@@ -2,52 +2,52 @@ const alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j","k", "l", "m"
 const ALPHABET_LENGTH = 26;
 
 function caesarCipher(message, shift){
-    let finalString = "";
+    let fs = "";
     for(let ind = 0; ind < message.length; ind++){
         
         if(isCapitalLetter(message[ind]))
         {
             let initIndex = alphabet.indexOf(message[ind].toLowerCase());
             let finalindex = shiftLogic(initIndex, shift);
-            finalString += returnCapitalLetter(alphabet[finalindex]);
+            fs += returnCapitalLetter(alphabet[finalindex]);
             continue;
         }
         else if(isLowercaseLetter(message[ind]))
         {
             let initIndex = alphabet.indexOf(message[ind]);
             let finalindex = shiftLogic(initIndex, shift);
-            finalString += message[finalindex];
+            fs += message[finalindex];
         }
         else{
-            finalString += message[ind];
+            fs += message[ind];
         }
     }
-    return finalString;
+    return fs;
 }
 
 function caesarDecode(message, shift){
-    let finalString = "";
-    for(let ind = 0; ind < message.length; ind++){
+    let fs="";
+    for(let ind = 0; ind<message.length; ind++){
         
-        if(isCapitalLetter(message[ind]))
+        if(isCapitalLetter( message[ind]))
         {
-            let initIndex = alphabet.indexOf(message[ind].toLowerCase());
-            let finalindex = shiftLogic(initIndex, -shift);
-            finalString += returnCapitalLetter(alphabet[finalindex]);
+            let initIndex =  alphabet.indexOf(message[ind].toLowerCase());
+            let finalindex =shiftLogic(initIndex, -shift);
+            fs +=returnCapitalLetter(alphabet[finalindex]);
             continue;
         }
         else if(isLowercaseLetter(message[ind]))
         {
             let initIndex = alphabet.indexOf(message[ind]);
             let finalindex = shiftLogic(initIndex, -shift);
-            finalString += alphabet[finalindex];
+            fs += alphabet[finalindex];
         }
         else{
-            finalString += message[ind];
+            fs += message[ind];
         }
     }
 
-    return finalString;
+    return fs;
 }
 
 function generateCipher(){
@@ -71,7 +71,7 @@ function generateCipher(){
 
 
 function substitutionCipher(message, cipherMap){
-    let finalString = "";
+    let fs = "";
     for(let ind = 0; ind < message.length; ind++){
         if(isCapitalLetter(message[ind]))
         {
@@ -79,11 +79,11 @@ function substitutionCipher(message, cipherMap){
             let inCipher = cipherMap[lowerChar];
             if(inCipher)
             {
-                finalString += returnCapitalLetter(ciphered);
+                fs += returnCapitalLetter(inCipher);
             }
             else
             {
-                finalString += message[ind];
+                fs += message[ind];
             }
             continue;
         }
@@ -92,86 +92,86 @@ function substitutionCipher(message, cipherMap){
             let inCipher = cipherMap[message[ind]];
             if(inCipher)
             {
-                finalString += inCipher;
+                fs += inCipher;
             }
             else
             {
-                finalString += message[ind];
+                fs += message[ind];
             }
         }
         else
         {
-            finalString += message[ind];
+            fs += message[ind];
         }
     }
-    return finalString;
+    return fs;
 }
 
 
 
 
 function substitutionDecode(message, cipherMap){
-    let finalString = "";
+    let fs = "";
     for(let ind = 0; ind < message.length; ind++){
         
         if(isCapitalLetter(message[ind]))
         {
             let lowerChar = message[ind].toLowerCase();
-            let original = getOriginalValue(cipherMap, lowerChar);
-            if(original){
-                finalString += returnCapitalLetter(original);
+            let oVal = getoValValue(cipherMap, lowerChar);
+            if(oVal){
+                fs += returnCapitalLetter(oVal);
             }
             else{
-                finalString += message[ind];
+                fs += message[ind];
             }
             continue;
         }
         else if(isLowercaseLetter(message[ind]))
         {
-            let original = getOriginalValue(cipherMap, message[ind]);
-            if(original){
-                finalString += original;
+            let oVal = getoValValue(cipherMap, message[ind]);
+            if(oVal){
+                fs += oVal;
             }
             else{
-                finalString += message[ind];
+                fs += message[ind];
             }
         }
         else{
-            finalString += message[ind];
+            fs += message[ind];
         }
     }
-    return finalString;
+    return fs;
 }
 
 
-const getOriginalValue = (map, searchValue) => {
-    for (let [key, value] of map.entries()) {
-        if (value === searchValue) {
-            return key;
+const getoValValue = (map, sV) => {
+    for (let [k, v] of map.entries()) {
+        if (v=== sV) {
+            return k;
         }
     }
     return undefined;
 }
-const isCapitalLetter =(characterString) =>
+const isCapitalLetter =(charString) =>
 {
-  return ( characterString.length ===1&&characterString>="A"&& characterString<="Z");
+  return ( charString.length ===1&&charString>="A"&& charString<="Z");
 };
 
-const returnCapitalLetter = (characterString) =>{
-    return characterString.toUpperCase();
+const returnCapitalLetter = (cString) =>{
+    return cString.toUpperCase();
 }
 
-const isLowercaseLetter = (characterString) =>
+const isLowercaseLetter = (cString) =>
 {
-    return (characterString.length === 1 && characterString <=z && characterString >= a);
+    return (cString.length === 1 && cString <="z" && cString >= "a");
 };
 
-const shiftLogic=(initialIndex, shift)=>{
-    return ((initialIndex + shift)%26 + 26) % 26;
+const shiftLogic=(givenI, shift)=>{
+    return ((givenI + shift)%26 + 26) % 26;
 };
 
-const alphabetLetter = (characterString) =>{
-    if (characterString.length !== 1) return false;
-    const ch = characterString.toLowerCase();
+const alphabetLetter = (cString) =>{
+    if (cString.length !== 1) return false;
+    const ch = cString.toLowerCase();
     return alphabet.indexOf(ch) !== -1;
 }
