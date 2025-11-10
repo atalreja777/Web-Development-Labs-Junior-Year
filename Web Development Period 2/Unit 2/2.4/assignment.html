@@ -1,348 +1,347 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Cipher Tool</title>
-  <style>
-    body { font-family: sans-serif; margin: 20px; }
-    #mapping { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
-    .tile { border: 1px solid #ccc; padding: 4px 6px; width: 42px; text-align: center; }
-    textarea { width: 100%; max-width: 700px; }
-    .row { margin: 8px 0; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Assingment 2.4</title>
+    <style>
+        .mapping {
+            display: flex;
+        }
+        textarea {
+            width: 300px;
+            height: 100px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Ciphers + DOM</h1>
+    <h1>Assingment 2.4</h1>
+    <label>Whether you want a subtitution or a caesar cipher with shifts:
+        <select id="chosenCiph">
+            <option value="caesar">Caesar(Shift) Cipher</option>
+            <option value="substitution">Substitution Cipher</option>
+        </select>
+    </label>
+    <label>Shift: <input id="shift" type="number" value="3"></label>
+    <br>
 
-  <div class="row">
-    <label>Type:</label>
-    <select id="cipherType">
-      <option value="caesar">Caesar (Shift)</option>
-      <option value="substitution">Substitution (Mapping)</option>
-    </select>
+    <button id="genBtn">Generate Cipher</button>
+    <input id="loadInput" type="text" placeholder="Now here you can determine which letter is assigned to what">
+    <button id="loadBtn">Load Cipher</button>
+    <span id="error" style="color:red"></span>
 
-    <label for="shift">Shift:</label>
-    <input id="shift" type="number" value="3" style="width:60px">
-  </div>
+    <div id="mapping" class="mapping"></div>
 
-  <div class="row">
-    <button id="genCipher">Generate New Cipher</button>
-    <input id="loadInput" type="text" placeholder="Enter 26-letter mapping (e.g. QWERTY...)" style="width:320px">
-    <button id="loadCipher">Load Cipher</button>
-    <span id="errorMsg" style="color:red; margin-left:8px;"></span>
-  </div>
+    <h3>Here input what you want to encrypt or decrypt:</h3>
+    <textarea id="plain"></textarea><br>
+    <button id="encBtn">Encrypt to transform into a secret code</button>
+    <button id="decBtn">Decrypt to see what the secret code says</button><br>
+    <textarea id="answer" readonly></textarea>
 
-  <h3>Current Mapping</h3>
-  <div id="mapping"></div>
+    <script>
+    
+        const alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+        const ALPHABET_LENGTH = 26;
+        const upperAllAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  <h3>Encrypt / Decrypt</h3>
-  <div class="row">
-    <textarea id="inputMsg" rows="4" cols="60" placeholder="Enter text..."></textarea>
-  </div>
-  <div class="row">
-    <button id="encryptBtn">Encrypt</button>
-    <button id="decryptBtn">Decrypt</button>
-  </div>
-  <div class="row">
-    <textarea id="outputMsg" rows="4" cols="60" readonly placeholder="Output appears here..."></textarea>
-  </div>
+        const isCapitalLetter =(cStr) =>
+        {
+          return ( cStr.length === 1 && cStr >= "A" && cStr <= "Z");
+        };
 
-  <script>
-    // ----- your style: constants and helpers -----
-    const alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
-    const ALPHABET_LENGTH = 26;
+        const returnCapitalLetter = (cStr) =>
+        {
+            return cStr.toUpperCase();
+        };
 
-    const isCapitalLetter = (characterString) => {
-      return (characterString.length === 1 && characterString >= "A" && characterString <= "Z");
-    };
+        const isLowercaseLetter = (cStr) =>
+        {
+            return (cStr.length === 1 && cStr >= "a" && cStr <= "z");
+        };
 
-    const returnCapitalLetter = (characterString) => {
-      return characterString.toUpperCase();
-    };
+        const shiftLogic=(initialIndex, shift) =>
+        {
+            return ((initialIndex + shift) % ALPHABET_LENGTH + ALPHABET_LENGTH) % ALPHABET_LENGTH;
+        };
 
-    const isLowercaseLetter = (characterString) => {
-      return (characterString.length === 1 && characterString >= "a" && characterString <= "z");
-    };
-
-    const shiftLogic = (initialIndex, shift) => {
-      return ((initialIndex + shift) % 26 + 26) % 26;
-    };
-
-    const alphabetLetter = (characterString) => {
-      if (characterString.length !== 1) return false;
-      const ch = characterString.toLowerCase();
-      return alphabet.indexOf(ch) !== -1;
-    };
-
-    // find original key by value in a plain object map
-    const getOriginalValue = (map, searchValue) => {
-      const keys = Object.keys(map);
-      for (let i = 0; i < keys.length; i++) {
-        const k = keys[i];
-        if (map[k] === searchValue) {
-          return k;
+        const getOriginalValue = (map, searchValue) => {
+            for (let [key, value] of map.entries()) {
+                if (value === searchValue) {
+                    return key;
+                }
+            }
+            return undefined;
         }
-      }
-      return undefined;
-    };
 
-    // ----- Caesar -----
-    function caesarCipher(message, shift){
-      let finalString = "";
-      for(let ind = 0; ind < message.length; ind++){
-        const ch = message[ind];
+        
+        let currentCipher = {};  
+        let lowMapping = null;       
 
-        if(isCapitalLetter(ch)) {
-          let initIndex = alphabet.indexOf(ch.toLowerCase());
-          if (initIndex === -1) {
-            finalString += ch;
-          } else {
-            let finalindex = shiftLogic(initIndex, shift);
-            finalString += returnCapitalLetter(alphabet[finalindex]);
-          }
-          continue;
-        } else if(isLowercaseLetter(ch)) {
-          let initIndex = alphabet.indexOf(ch);
-          if (initIndex === -1) {
-            finalString += ch;
-          } else {
-            let finalindex = shiftLogic(initIndex, shift);
-            finalString += alphabet[finalindex];
-          }
-        } else {
-          finalString += ch;
+        function updateDisplay() {
+            const div = document.querySelector("#mapping");
+            div.innerHTML = "";
+            for (let i = 0; i < upperAllAlpha.length; i++) {
+                const ch = upperAllAlpha[i];
+                const tile = document.createElement("div");
+                tile.className = "tile";
+                const mapped = currentCipher[ch];
+                if (mapped) {
+                    tile.textContent = ch + "→" + mapped;
+                } else {
+                    tile.textContent = ch + "→" + ch;
+                }
+                div.appendChild(tile);
+            }
         }
-      }
-      return finalString;
-    }
 
-    function caesarDecode(message, shift){
-      let finalString = "";
-      for(let ind = 0; ind < message.length; ind++){
-        const ch = message[ind];
+        // ===== embed your logic directly inside the handlers =====
 
-        if(isCapitalLetter(ch)) {
-          let initIndex = alphabet.indexOf(ch.toLowerCase());
-          if (initIndex === -1) {
-            finalString += ch;
-          } else {
-            let finalindex = shiftLogic(initIndex, -shift);
-            finalString += returnCapitalLetter(alphabet[finalindex]);
-          }
-          continue;
-        } else if(isLowercaseLetter(ch)) {
-          let initIndex = alphabet.indexOf(ch);
-          if (initIndex === -1) {
-            finalString += ch;
-          } else {
-            let finalindex = shiftLogic(initIndex, -shift);
-            finalString += alphabet[finalindex];
-          }
-        } else {
-          finalString += ch;
+        // Generate (uses your shift logic for Caesar, your Fisher–Yates for Substitution)
+        function generateCipher() {
+            const type = document.querySelector("#chosenCiph").value;
+
+            if (type === "caesar") {
+                let shift = parseInt(document.querySelector("#shift").value, 10);
+                if (isNaN(shift)) {
+                    shift = 0;
+                }
+
+                currentCipher = {};
+                for (let i = 0; i < 26; i++) {
+                    let idx = shiftLogic(i, shift);
+                    currentCipher[upperAllAlpha[i]] = upperAllAlpha[idx];
+                }
+                lowMapping = null;
+            }
+            else {
+                // Inline your generateCipher() logic (Fisher–Yates)
+                const letters = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+                let currentIndex = letters.length;
+                let randomIndex;
+
+                while (currentIndex !== 0) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex--;
+                    let tmp = letters[currentIndex];
+                    letters[currentIndex] = letters[randomIndex];
+                    letters[randomIndex] = tmp;
+                }
+
+                lowMapping = {};
+                for (let ind = 0; ind < ALPHABET_LENGTH; ind++) {
+                    lowMapping[alphabet[ind]] = letters[ind];
+                }
+
+                currentCipher = {};
+                for (let i = 0; i < 26; i++) {
+                    const l = alphabet[i];
+                    const u = upperAllAlpha[i];
+                    const mappedLo = lowMapping[l];
+                    if (mappedLo) {
+                        currentCipher[u] = mappedLo.toUpperCase();
+                    } else {
+                        currentCipher[u] = up;
+                    }
+                }
+            }
+
+            updateDisplay();
         }
-      }
-      return finalString;
-    }
 
-    // ----- Substitution -----
-    function generateCipher(){
-      const letters = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
-      let currentIndex = letters.length;
-      let randomIndex;
+        // Load (validates and sets both tiles and your lowercase map)
+        function loadCipher() {
+            const txt = document.querySelector("#loadInput").value;
+            let str = "";
+            if (typeof txt === "string") {
+                str = txt.toUpperCase();
+            }
 
-      while (currentIndex !== 0) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-        const tmp = letters[currentIndex];
-        letters[currentIndex] = letters[randomIndex];
-        letters[randomIndex] = tmp;
-      }
+            const error = document.querySelector("#error");
+            if (str.length !== 26) {
+                error.textContent = "Invalid cipher mapping";
+                return;
+            }
+            const unique = new Set(str);
+            if (unique.size !== 26) {
+                error.textContent = "Invalid cipher mapping";
+                return;
+            }
+            const nonAZ = /[^A-Z]/.test(str);
+            if (nonAZ) {
+                error.textContent = "Invalid cipher mapping";
+                return;
+            }
+            error.textContent = "";
 
-      const cipherMap = {};
-      for(let ind = 0; ind < ALPHABET_LENGTH; ind++){
-        cipherMap[alphabet[ind]] = letters[ind];
-      }
+            currentCipher = {};
+            for (let i = 0; i < 26; i++) {
+                currentCipher[upperAllAlpha[i]] = str[i];
+            }
 
-      return cipherMap;
-    }
+            lowMapping = {};
+            for (let i = 0; i < 26; i++) {
+                lowMapping[alphabet[i]] = str[i].toLowerCase();
+            }
 
-    function substitutionCipher(message, cipherMap){
-      let finalString = "";
-      for(let ind = 0; ind < message.length; ind++){
-        const ch = message[ind];
-
-        if(isCapitalLetter(ch)) {
-          let lowerChar = ch.toLowerCase();
-          let mapped = cipherMap[lowerChar];
-          if(mapped) {
-            finalString += returnCapitalLetter(mapped);
-          } else {
-            finalString += ch;
-          }
-          continue;
-        } else if(isLowercaseLetter(ch)) {
-          let mapped = cipherMap[ch];
-          if(mapped) {
-            finalString += mapped;
-          } else {
-            finalString += ch;
-          }
-        } else {
-          finalString += ch;
+            updateDisplay();
         }
-      }
-      return finalString;
-    }
 
-    function substitutionDecode(message, cipherMap){
-      let finalString = "";
-      for(let ind = 0; ind < message.length; ind++){
-        const ch = message[ind];
+        // Transform (directly embeds your Caesar/Substitution encode/decode loops)
+        function transform(text, encrypt = true) {
+            const type = document.querySelector("#chosenCiph").value;
 
-        if(isCapitalLetter(ch)) {
-          let lowerChar = ch.toLowerCase();
-          let original = getOriginalValue(cipherMap, lowerChar);
-          if(original) {
-            finalString += returnCapitalLetter(original);
-          } else {
-            finalString += ch;
-          }
-          continue;
-        } else if(isLowercaseLetter(ch)) {
-          let original = getOriginalValue(cipherMap, ch);
-          if(original) {
-            finalString += original;
-          } else {
-            finalString += ch;
-          }
-        } else {
-          finalString += ch;
+            if (type === "caesar") {
+                let shift = parseInt(document.querySelector("#shift").value, 10);
+                if (isNaN(shift)) {
+                    shift = 0;
+                }
+
+                if (encrypt === true) {
+                    // your caesarCipher(message, shift)
+                    let resStr = "";
+                    for(let ind = 0; ind < text.length; ind++){
+                        if(isCapitalLetter(text[ind]))
+                        {
+                            let initIndex = alphabet.indexOf(text[ind].toLowerCase());
+                            let finalindex = shiftLogic(initIndex, shift);
+                            resStr += returnCapitalLetter(alphabet[finalindex]);
+                            continue;
+                        }
+                        else if(isLowercaseLetter(text[ind]))
+                        {
+                            let initIndex = alphabet.indexOf(text[ind]);
+                            let finalindex = shiftLogic(initIndex, shift);
+                            resStr += alphabet[finalindex];
+                        }
+                        else{
+                            resStr += text[ind];
+                        }
+                    }
+                    return resStr;
+                }
+                else {
+                   
+                    let resStr = "";
+                    for(let ind = 0; ind < text.length; ind++){
+                        if(isCapitalLetter(text[ind]))
+                        {
+                            let initIndex = alphabet.indexOf(text[ind].toLowerCase());
+                            let finalindex = shiftLogic(initIndex, -shift);
+                            resStr += returnCapitalLetter(alphabet[finalindex]);
+                            continue;
+                        }
+                        else if(isLowercaseLetter(text[ind]))
+                        {
+                            let initIndex = alphabet.indexOf(text[ind]);
+                            let finalindex = shiftLogic(initIndex, -shift);
+                            resStr += alphabet[finalindex];
+                        }
+                        else{
+                            resStr += text[ind];
+                        }
+                    }
+                    return resStr;
+                }
+            }
+            else {
+                // ensure lowercase map exists from tiles if not generated/loaded
+                if (!lowMapping) {
+                    lowMapping = {};
+                    for (let i = 0; i < 26; i++) {
+                        const upFrom = upperAllAlpha[i];
+                        const upTo = currentCipher[upFrom];
+                        if (upTo) {
+                            lowMapping[alphabet[i]] = upTo.toLowerCase();
+                        } else {
+                            lowMapping[alphabet[i]] = upFrom.toLowerCase();
+                        }
+                    }
+                }
+
+                if (encrypt === true) {
+                    // your substitutionCipher(message, cipherMap)
+                    let resStr = "";
+                    for(let ind = 0; ind < text.length; ind++){
+                        if(isCapitalLetter(text[ind]))
+                        {
+                            let lowerChar = text[ind].toLowerCase();
+                            let inCipher = lowMapping[lowerChar];
+                            if(inCipher)
+                            {
+                                resStr += returnCapitalLetter(inCipher);
+                            }
+                            else
+                            {
+                                resStr += text[ind];
+                            }
+                            continue;
+                        }
+                        else if(isLowercaseLetter(text[ind]))
+                        {
+                            let inCipher = lowMapping[text[ind]];
+                            if(inCipher)
+                            {
+                                resStr += inCipher;
+                            }
+                            else
+                            {
+                                resStr += text[ind];
+                            }
+                        }
+                        else
+                        {
+                            resStr += text[ind];
+                        }
+                    }
+                    return resStr;
+                }
+                else {
+                    // your substitutionDecode(message, cipherMap)
+                    let resStr = "";
+                    for(let ind = 0; ind < text.length; ind++){
+                        if(isCapitalLetter(text[ind]))
+                        {
+                            let lowerChar = text[ind].toLowerCase();
+                            let start = getOriginalValue(lowMapping, lowerChar);
+                            if(start){
+                                resStr += returnCapitalLetter(start);
+                            }
+                            else{
+                                resStr += text[ind];
+                            }
+                            continue;
+                        }
+                        else if(isLowercaseLetter(text[ind]))
+                        {
+                            let start = getOriginalValue(lowMapping, text[ind]);
+                            if(start){
+                                resStr += start;
+                            }
+                            else{
+                                resStr += text[ind];
+                            }
+                        }
+                        else{
+                            resStr += text[ind];
+                        }
+                    }
+                    return resStr;
+                }
+            }
         }
-      }
-      return finalString;
-    }
 
-    // ----- DOM + State -----
-    let currentCipher = null; // object like { a: 'q', b: 'z', ... }
+        // ===== exact event wiring you wanted to keep =====
+        document.querySelector("#genBtn").onclick = generateCipher;
+        document.querySelector("#loadBtn").onclick = loadCipher;
+        document.querySelector("#encBtn").onclick = () => {
+            document.querySelector("#answer").value =
+                transform(document.querySelector("#plain").value, true);
+        };
+        document.querySelector("#decBtn").onclick = () => {
+            document.querySelector("#answer").value =
+                transform(document.querySelector("#plain").value, false);
+        };
 
-    const renderMapping = (map) => {
-      const container = document.querySelector("#mapping");
-      container.innerHTML = "";
-
-      if (!map) {
-        return;
-      }
-
-      for (let i = 0; i < ALPHABET_LENGTH; i++) {
-        const from = alphabet[i];
-        const to = map[from];
-        const tile = document.createElement("div");
-        tile.className = "tile";
-        if (to) {
-          tile.textContent = from.toUpperCase() + "→" + to.toUpperCase();
-        } else {
-          tile.textContent = from.toUpperCase() + "→?";
-        }
-        container.appendChild(tile);
-      }
-    };
-
-    // Generate new substitution mapping
-    document.querySelector("#genCipher").onclick = function() {
-      const type = document.querySelector("#cipherType").value;
-      const err = document.querySelector("#errorMsg");
-
-      if (type === "substitution") {
-        currentCipher = generateCipher();
-        renderMapping(currentCipher);
-        err.textContent = "";
-      } else {
-        err.textContent = "Caesar uses only the numeric shift.";
-      }
-    };
-
-    // Load mapping from text
-    document.querySelector("#loadCipher").onclick = function() {
-      const txt = document.querySelector("#loadInput").value.trim().toLowerCase();
-      const err = document.querySelector("#errorMsg");
-
-      if (txt.length !== 26) {
-        err.textContent = "Error: Must be exactly 26 letters.";
-        return;
-      }
-
-      for (let i = 0; i < txt.length; i++) {
-        const ch = txt[i];
-        if (!isLowercaseLetter(ch)) {
-          err.textContent = "Error: Only letters a-z are allowed.";
-          return;
-        }
-      }
-
-      const seen = {};
-      for (let i = 0; i < txt.length; i++) {
-        const ch = txt[i];
-        if (seen[ch]) {
-          err.textContent = "Error: No duplicate letters allowed.";
-          return;
-        }
-        seen[ch] = true;
-      }
-
-      const map = {};
-      for (let i = 0; i < ALPHABET_LENGTH; i++) {
-        map[alphabet[i]] = txt[i];
-      }
-
-      currentCipher = map;
-      err.textContent = "";
-      renderMapping(currentCipher);
-    };
-
-    // Encrypt
-    document.querySelector("#encryptBtn").onclick = function() {
-      const type = document.querySelector("#cipherType").value;
-      const shiftInput = document.querySelector("#shift").value;
-      const msg = document.querySelector("#inputMsg").value;
-      let out = "";
-
-      if (type === "caesar") {
-        const shift = parseInt(shiftInput);
-        out = caesarCipher(msg, isNaN(shift) ? 0 : shift);
-      } else {
-        if (currentCipher) {
-          out = substitutionCipher(msg, currentCipher);
-        } else {
-          out = "No substitution cipher loaded.";
-        }
-      }
-
-      document.querySelector("#outputMsg").value = out;
-    };
-
-    // Decrypt
-    document.querySelector("#decryptBtn").onclick = function() {
-      const type = document.querySelector("#cipherType").value;
-      const shiftInput = document.querySelector("#shift").value;
-      const msg = document.querySelector("#inputMsg").value;
-      let out = "";
-
-      if (type === "caesar") {
-        const shift = parseInt(shiftInput);
-        out = caesarDecode(msg, isNaN(shift) ? 0 : shift);
-      } else {
-        if (currentCipher) {
-          out = substitutionDecode(msg, currentCipher);
-        } else {
-          out = "No substitution cipher loaded.";
-        }
-      }
-
-      document.querySelector("#outputMsg").value = out;
-    };
-
-    // initial render
-    renderMapping(null);
-  </script>
+        generateCipher();
+    </script>
 </body>
 </html>
