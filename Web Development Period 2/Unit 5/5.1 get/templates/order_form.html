@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meal Ticket</title>
+</head>
+<body>
+    <h1>Meal Ticket</h1>
+
+    <form action="/summary" method="GET">
+
+        <label>Entree:</label><br>
+        <select name="meal">
+            {% for name, price in meals.items() %}
+                <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <hr>
+
+        <label>How many of the entree above do you want?</label><br>
+        <input type="number" name="meal_qty" min="0" value="1">
+        <hr>
+
+        <label>Drink:</label><br>
+        <select name="drink">
+            {% for name, price in drinks.items() %}
+                <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <hr>
+
+        <label>Number of drinks:</label><br>
+        <input type="number" name="drink_qty" min="0" value="0">
+        <hr>
+
+        <input type="checkbox" name="senior">
+        <label>Senior discount (10% off)</label>
+        <hr>
+
+        <label>Special instructions:</label><br>
+        <textarea name="notes" rows="4" cols="40"></textarea>
+        <hr>
+
+        <input type="submit" value="Submit Order">
+    </form>
+
+    <hr>
+    <a href="/manager">If you're the kitchen manager somehow click HERE</a>
+</body>
+</html>

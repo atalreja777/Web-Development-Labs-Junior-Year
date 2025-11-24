@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for
 app = Flask(__name__)
 app.debug = True
 
-x = {
+sched = {
     "count": 110,
     "next": "https://ion.tjhsst.edu/api/schedule?page=5",
     "previous": "https://ion.tjhsst.edu/api/schedule?page=3",
@@ -56,7 +56,7 @@ def root():
 
 @app.route("/schedule")
 def view_schedule():
-    day = x["results"][0]  # one day
+    day = sched["results"][0]
     return render_template("schedule.html", day=day)
 
 if __name__ == "__main__":

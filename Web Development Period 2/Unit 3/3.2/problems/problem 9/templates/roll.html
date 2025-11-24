@@ -1,19 +1,18 @@
 <!doctype html>
 <html>
   <head>
-    <title>Dice Roller</title>
     <style>
-      .wrap { display: flex; }
-      .die  { border: 1px solid; padding: 6px; margin: 2px; }
+      .r { display: flex; }
+      .t { border: 1px solid black; }
     </style>
   </head>
   <body>
-    <h1>Rolling {{ dice }} dice with {{ sides }} sides</h1>
-    <div class="wrap">
-      {% for r in rolls %}
-        <div class="die">{{ r }}</div>
+    <h1>{{ num_dice }} dice;{{ num_sides }} sides</h1>
+
+    <div class="r">
+      {% for value in rolls %}
+        <div class="t">{{ value }}</div>
       {% endfor %}
     </div>
-    <p><a href="{{ url_for('home') }}">Back</a></p>
   </body>
 </html>

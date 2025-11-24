@@ -25,7 +25,7 @@ def log_here():
     previous_visit = curr_time
     new_visit = {
         'ip': request.remote_addr,
-        'agent':request.headers.get('User-Agent', 'unknown'),
+        'agent':request.headers.get('User-Agent'),
         'time':curr_time.strftime('%Y-%m-%d %H:%M:%S'),
         'since_last':difference
     }

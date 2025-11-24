@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Order right here</h1>
+    <p>Meals bought {{ meal_qty }} × {{ meal_choice }} = ${{ meal_total}}</p>
+    <p>Drinks bought {{ drink_qty }} × {{ drink_choice }} = ${{drink_total}}</p>
+    <p>Subtotal: ${{subtotal}}</p>
+
+    {% if senior %}
+        <p>Senior discout is here; you saved: -${{ discount }} from being old</p>
+    {% endif %}
+    <p>Total: ${{ total }}</p>
+
+    <p>Special instructions:</p>
+    <p>{{ notes }}</p>
+
+    <hr>
+    <a href="/">GO TO HERE TO GIVE MORE BUISNESS</a><hr>
+    <a href="/manager"> FOR MANAGER ONLY: TELLS HOW GOOD OUR BUISNESS IS DOING </a>
+</body>
+</html>
