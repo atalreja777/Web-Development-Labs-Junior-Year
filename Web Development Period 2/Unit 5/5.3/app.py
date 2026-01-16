@@ -9,29 +9,29 @@ with open('credentials.json', 'r') as file:
     credentials = json.load(file)
 
 def using_hashlib(test_string):
-    b_teststring = test_string.encode('utf-8')  # encoded to a bytestring
-    sha_obj = hashlib.sha256()                  # Create a sha256 hash object
-    sha_obj.update(b_teststring)                # pass the string to the hash object
+    b_teststring = test_string.encode('utf-8') 
+    sha_obj = hashlib.sha256()                 
+    sha_obj.update(b_teststring)               
     hashed_val = sha_obj.hexdigest()            
     return hashed_val
 
 @app.route("/")
 def home():
-    logged_in = session.get("logged_in", False)
-    username = session.get("user", "")
-    return render_template("home.html", logged_in=logged_in, username=username)
+    l_in = session.get("logged_in", False)
+    user = session.get("user", "")
+    return render_template("home.html", logged_in=l_in, username=user)
 
 @app.route("/login", methods=["POST"])
 def login():
-    username = request.form.get("username", "")
+    user= request.form.get("username", "")
     password = request.form.get("password", "")
 
-    hashedPwrd = using_hashlib(password)
-    stored = credentials.get(username)
+    hashedPwrd= using_hashlib(password)
+    stored = credentials.get(user)
 
     if stored != None and stored == hashedPwrd:
         session["logged_in"] = True
-        session["user"] = username
+        session["user"] = user
         return redirect(url_for("home"))
     else:
         return redirect("/?success=false")

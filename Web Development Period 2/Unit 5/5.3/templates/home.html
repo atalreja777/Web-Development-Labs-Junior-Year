@@ -31,17 +31,17 @@ body {font-family: Arial, Helvetica, sans-serif;}
 
 /* The Close Button */
 .close {
-  color: #aaaaaa;
+  color: gray;
   float: right;
   font-size: 28px;
-  font-weight: bold;
+  font-weight: bold; 
 }
 
 .close:hover,
 .close:focus {
-  color: #000;
+  color:black;
   text-decoration: none;
-  cursor: pointer;
+  cursor: pointer;    
 }
 </style>
 </head>
@@ -54,8 +54,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
   <p><a href="/premiumcontent">Logged in continue here</a></p>
   <a href="/logout">Logout</a>
 {% else %}
-  <p>You are not logged in.</p>
-  <!-- Trigger/Open The Modal -->
+  <p>You are not logged in.</p> 
   <button id="myBtn">Login</button>
 {% endif %}
 

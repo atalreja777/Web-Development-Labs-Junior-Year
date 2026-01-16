@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summative Assignment for Unit 4 -- SOLVED</title>
+    <style>
+        body {
+            margin: 0;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+    
+        #wordle-grid {
+            margin: 10px auto;
+            width: 260px; 
+        }
+      
+        .wordle-block {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            margin: 7px;
+            border: 1px solid black;
+            font-weight: bold;
+            font-size: 24px;
+            line-height: 40px;
+            text-transform: uppercase;
+            color: black;
+        }
+        .green {
+            background-color: #227e1a; 
+            color: white;
+        }
+        .yellow {
+            background-color: #ffd000; 
+            color: white;
+        }
+        .gray {
+            background-color: #565758da;
+            color: white;
+        }
+        #words {
+            margin-top: 10px;
+        }
+        #alerts {
+            top: 0;
+            left: 0;
+            padding: 4px;
+            text-align: left;
+        }
+        .rules{
+            text-align: left;
+            font-size: large;
+            font-style:italic;
+        }
+    </style>
+</head>
+<body>
+   
+    <div id="alerts"></div>
+    <h1>Solver for Wordle</h1>
+
+    <div id="wordle-grid">
+        {% for num in amount_blocks %}
+            <div class="wordle-block" id="block-{{ num }}"></div>
+        {% endfor %}
+        <!-- each block is assigned a different id for the purpose of individual styling -->
+    </div>
+
+    <div id="words">
+        <ul id="words-list">
+            <li>No letters have been submitted yet, are you sure you pressed enter??</li>
+        </ul>
+    </div>
+    <div>
+        <p class="rules">These are the rules, enter your words, when you recieve your result in wordle, it will be either green,yellow, grey, to choose these o</p>
+    </div>
+
+    <script>
+        let indexOfConcern = 1;
+        const color_orderings = ["none", "gray", "yellow", "green"];
+
+        function alertsHandledHere(text) {
+            let arlerted = document.getElementById("alerts");
+            arlerted.innerHTML = "";
+            let firstline = document.createElement("div");
+            firstline.textContent = text;
+            let rulespresented = document.createElement("div");
+            rulespresented.innerHTML = 'The box that is highlighted <span style="color: purple;">purple</span> is the current box that you are on!';
+
+            arlerted.appendChild(firstline);
+            arlerted.appendChild(rulespresented);
+        }
+
+        function boxHighlightedHere() {
+            // first lets make sure to reset the coloring to black, previous errors arose from style mismanagement
+            for (let i = 1; i < 31; i++) {
+                let bk = document.getElementById("block-" + i);
+                if (bk) {
+                    bk.style.borderColor = "black";
+                    bk.style.borderWidth = "1px";
+                }
+            }
+            let cBk = document.getElementById("block-" + indexOfConcern);
+            if (cBk) {
+                cBk.style.borderColor = "purple";
+                cBk.style.borderWidth = "3px";
+            }
+        }
+
+        function retBlockColor(block) {
+            if (block.classList.contains("green")) {
+                return "green";
+            }
+            if (block.classList.contains("yellow")) {
+                return "yellow";
+            }
+            if (block.classList.contains("gray")) {
+                return "gray";
+            }
+            return "none";
+        }
+
+
+        for (let i = 1; i < 31; i++) {
+            let block = document.querySelector("#block-" + i);
+            block.addEventListener("click", function () {
+                indexOfConcern =i;
+                let currColor = retBlockColor(block);
+                let idx_of_col= color_orderings.indexOf(currColor);
+                let next_color_possible =color_orderings[(idx_of_col+1) %color_orderings.length ];
+                block.classList.remove("green", "yellow", "gray");
+                if ( next_color_possible !=="none"){
+                    block.classList.add(next_color_possible);
+                }
+                boxHighlightedHere();
+            });
+        }
+
+        document.addEventListener("keydown", function (ev) {
+            if (ev.key === "Backspace") {
+                if (indexOfConcern === 1) {
+                    alertsHandledHere("WAIT ITS NOT POSSIBLE TO GO BACK FURTHER PLEASE OBSERVE ONCE MORE.");
+                    return;
+                }
+                indexOfConcern--;
+                document.querySelector("#block-"+indexOfConcern).innerHTML ="";
+                boxHighlightedHere();
+                return;
+            }
+            if (ev.key === "Enter") {
+                enteredResponse();
+                return;
+            }
+            if (indexOfConcern > 30) {
+                alertsHandledHere("YOU ARE AT THE LAST POSSIBLE INDEX; THERE ARE NO MORE THINGS TO ENTER");
+                return;
+            }
+            if (!/^[a-zA-Z]$/.test(ev.key)) {
+                alertsHandledHere("MAKE SURE THAT THE KEY YOU PRESSED IS ONE THAT IS ONE ACCEPTABLE");
+                return;
+            }
+            document.querySelector("#block-" + indexOfConcern).innerHTML = ev.key.toUpperCase();
+            indexOfConcern++;
+            boxHighlightedHere();
+        });
+
+        async function goThroughWordList() {
+            let indexlettercolor = [];
+            for (let i = 1; i < 31; i++) {
+                let block = document.querySelector("#block-" + i);
+                let letter = block.textContent.trim();
+                if(letter == "")
+                    letter = "_"
+                let color = retBlockColor(block);
+                indexlettercolor.push(i+":" +letter+":"+color);
+            }
+            let partsjoined = indexlettercolor.join(";");
+            let response = await fetch("/get-words/" + partsjoined);
+            return await response.json();
+        }
+
+        async function enteredResponse() {
+            for (let i = 1; i < 31; i++) {
+                // for every block remember, we need to get since this is a solver, some metrics: 
+                // includes the current color, whats the current text within that particular block, whats the colum number, particular row number 
+                // -- but thats just to let the person know what coordicates are/have errors
+                let block = document.querySelector("#block-" + i);
+                let textInBlock = block.textContent.trim();
+                let color = retBlockColor(block);
+                let col = (i % 5);
+                if(col == 0)
+                    col = 5
+                let row = Math.floor((i - 1) / 5) + 1;
+                //remember either lets account for the two base cases in particular, the fact a number isn't present
+                //the second possible case however, is that they forget to choose a color, this should be another thing accounted fo 
+                if ( textInBlock=== "" && color !== "none") {
+                    alertsHandledHere("A block located in this column, row pair given here: " + col + "," + row + " though it has a color selected a LETTER ISN'T PRESENT THERE");
+                    return;
+                }
+
+                if ( color === "none"&&textInBlock !=="") {
+                    alertsHandledHere("A block located in this column, row pair given here: " + col + "," + row + " doesnt have a color selected");
+                    return;
+                }
+                
+            }
+
+            let filtered_words = await goThroughWordList();
+            if (!Array.isArray(filtered_words)) {
+                if (filtered_words && "error" in filtered_words) {
+                    alertsHandledHere("Error: " + filtered_words["error"]);
+                } else {
+                    alertsHandledHere("I dont know why there is an error present that I am not sure about, an error occured while parsing through the word list");
+                }
+                return;
+            }
+
+            let list = document.querySelector("#words-list");
+            list.innerHTML = "";
+            filtered_words.forEach(function (word) {
+                let li = document.createElement("li");
+                li.textContent = word;
+                list.appendChild(li);
+            });
+        }
+
+    
+        boxHighlightedHere();
+    </script>
+</body>
+</html>

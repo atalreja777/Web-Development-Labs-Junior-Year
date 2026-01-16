@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <title>Wordle Assist Solver</title>
+    <style>
+        main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        body {
+            font-family: "Open Sans";
+            height: 100vh;
+            margin: 0;
+        }
+        .wordle-block {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid lightgray;
+            font-weight: bold;
+            font-size: 35px;
+            width: 100%;
+            height: 100%;
+            color: white;
+        }
+        .wordle-block[data-selected="none"] {
+            color: black;
+        }
+        #wordle-grid {
+            display: grid;
+            width: 500px;
+            grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            column-gap: 10px;
+            row-gap: 10px;
+            height: 600px;
+        }
+        #alerts {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .alert {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: red;
+            color: white;
+            width: 30vw;
+            border-radius: 4px;
+        }
+        #help {
+            width: 15px;
+            height: 15px;
+        }
+        .popover-holder {
+            position: relative;
+
+        }
+        .popover-content {
+            display: none;
+            background-color: black;
+            border-radius: 8px;
+            color: white;
+            padding: 10px;
+        }
+        .popover-holder:hover .popover-content, .popover-content:hover {
+            display: block;
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            transform: translate(-50%, -100%);
+        }
+        h1 {
+            margin: 15px;
+        }
+        .green {
+            background-color: #6aaa64;
+        }
+        .yellow {
+            background-color: #c9b458;
+        }
+        .gray {
+            background-color: #787c7e;
+        }
+        .color {
+            height: 30px;
+            width: 30px;
+            border: 1px solid lightgray;
+        }
+        .reset-button {
+            height: 15px;
+            width: 15px;
+        }
+        .selected {
+            outline: 2px solid lightskyblue;
+        }
+        #words {
+            position: absolute;
+            left: 75%;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div style="display: flex; align-items: center;">
+            <h1>Wordle Solver</h1>
+            <div class="popover-holder">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Icon-round-Question_mark.svg/2048px-Icon-round-Question_mark.svg.png" id="help">
+                <div class="popover-content" style="width: 200px;">
+                    Type your letters in. Click on the boxes to select their colors. Press enter to submit your query.
+                </div>
+            </div>
+        </div>
+        <div id="wordle-grid">
+            {% for num in num_blocks %}
+                <div class="popover-holder">
+                    <div class="wordle-block" id="block-{{ num }}" data-selected="none">
+                    </div>
+                    <div class="popover-content">
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <div class="green color" id="green-{{ num }}"></div>
+                            <div class="yellow color" id="yellow-{{ num }}"></div>
+                            <div class="gray color" id="gray-{{ num }}"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="reset-button" id="reset-{{ num }}">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+                    </div>
+                </div> 
+                
+            {% endfor %}
+        </div>
+        <div id="alerts">
+
+        </div>
+        <div id="words">
+            <h3>Try these guesses:</h1>
+            <ul id="words-list">
+                <li>You haven't submitted any letters yet.<br>Try pressing enter.</li>
+            </ul>
+        </div>
+    </main>
+    <script>
+        let currentIndex = 1;
+
+        for (let i = 1; i < 31; i++)
+        {
+            let block = document.querySelector(`#block-${i}`);
+            ["green", "yellow", "gray"].forEach((color) => {
+                document.querySelector(`#${color}-${i}`).addEventListener("click", (elem) => {
+                    clearSelectedColor(i);
+                    block.setAttribute("data-selected", color)
+                    elem.currentTarget.classList.add("selected");
+                    document.querySelector(`#block-${i}`).classList.add(color);
+                });
+                document.querySelector(`#reset-${i}`).addEventListener("click", () => {
+                    clearSelectedColor(i);
+                })
+            });
+        }
+
+        function clearSelectedColor(num) {
+            document.querySelector(`#green-${num}`).classList.remove("selected");
+            document.querySelector(`#yellow-${num}`).classList.remove("selected");
+            document.querySelector(`#gray-${num}`).classList.remove("selected");
+            document.querySelector(`#block-${num}`).classList.remove("green", "yellow", "gray")
+            document.querySelector(`#block-${num}`).setAttribute("data-selected", "none");
+        }
+
+        document.addEventListener("keydown", (ev) => {
+            if (ev.key === "Enter") {
+                sendQuery();  // async but we don't need to wait for it
+                return;
+            }
+            if (ev.key === "Backspace") {
+                if (currentIndex === 1) {
+                    raiseAlert("Can't go back any more blocks");
+                    return;
+                }
+                currentIndex--;
+                document.querySelector(`#block-${currentIndex}`).innerHTML = "";
+                return;
+            }
+            if (!/^[a-zA-Z]$/.test(ev.key)) {
+                raiseAlert("Invalid key");
+                return;
+            }
+            if (currentIndex > 30) {
+                raiseAlert("Can't enter any more words - press backspace to go back to the previous space or click on a space to directly edit it.");
+                return;
+            }
+            document.querySelector(`#block-${currentIndex}`).innerHTML = ev.key.toUpperCase();
+            currentIndex++;
+        });
+        function raiseAlert(text) {
+            let alertElem = document.createElement("div");
+            alertElem.innerHTML = text;
+            alertElem.classList.add("alert");
+            document.querySelector("#alerts").appendChild(alertElem);
+            setTimeout(() => {
+                alertElem.remove();
+            }, 5000)
+        }
+        async function searchWords() {
+            let words = {};
+            for (let i = 1; i < 31; i++)
+            {
+                words[i] = [];
+            }
+
+            Object.keys(words).forEach(key => {
+                let block = document.querySelector(`#block-${key}`);
+
+                words[key] = [block.textContent, block.getAttribute("data-selected")];
+            })
+
+            let filtered_word_search = await fetch("/get-words?" + new URLSearchParams(words));
+            return await filtered_word_search.json()
+        }
+
+        async function sendQuery() {
+            for (let i = 1; i < 31; i++) {
+                let block = document.querySelector(`#block-${i}`);
+                if (block.textContent.trim() !== "" && block.getAttribute("data-selected") == "none") {
+                    raiseAlert(`Block ${i % 5} in row ${Math.floor(i / 6) + 1} doesn't have a color selected.`);
+                    return;
+                }
+                if (block.textContent.trim() === "" && block.getAttribute("data-selected") !== "none") {
+                    raiseAlert(`Block ${i % 5} in row ${Math.floor(i / 6) + 1} has a color selected but not text`);
+                    return;
+                }
+            }
+            
+            let filtered_words = await searchWords();
+            if (!Array.isArray(filtered_words)) {
+                if ("error" in filtered_words) {
+                    raiseAlert(`Error: ${filtered_words["error"]}`);
+                } else {
+                    raiseAlert("Unknown error occurred");
+                }
+                return;
+            }
+
+            document.querySelector("#words-list").innerHTML = "";
+            filtered_words.forEach((word) => {
+                let elem = document.createElement("li");
+                elem.textContent = word;
+                document.querySelector("#words-list").appendChild(elem);
+            })
+        }        
+    </script>
+</body>
+</html>

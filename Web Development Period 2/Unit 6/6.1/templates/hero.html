@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Statspage</title>
+</head>
+<body>
+
+  <p style="margin-bottom: 14px;">
+    <a href="/">Back</a>
+  </p>
+
+  {% for c in characters %}
+    <h2 style="margin-bottom: 14px;">Statistics for the character you picked --{{ c['c_name'] }} </h2>
+
+    <div style="margin: 10px;">
+      <div>ID:{{ c['c_id'] }}</div>
+      <div>Wit:{{ c['c_wit'] }}</div>
+      <div>Strength: {{ c['c_strength'] }}</div>
+      <div>Attack: {{ c['c_attack'] }}</div>
+      <div>Defense: {{ c['c_defense'] }}</div>
+      <div>Magic: {{ c['c_magic'] }}</div>
+    </div>
+  {% endfor %}
+
+</body>
+</html>

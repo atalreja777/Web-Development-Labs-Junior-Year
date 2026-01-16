@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 votesup = 0
 votesdown = 0
@@ -31,5 +31,5 @@ def total():
     return jsonify({'upvote': votesup, 'downvote': votesdown})
 
 
-if _name_ == '_main_':
+if __name__ == '_main_':
    app.run(host='127.0.0.1', port=3000)

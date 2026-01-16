@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Characters</title>
+</head>
+<body>
+
+  <ul>
+    {% for c in characters %}
+      <li style="margin-bottom: 10px;">
+        <a href="/hero/{{ c['c_id'] }}">{{ c['c_name'] }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+</body>
+</html>
