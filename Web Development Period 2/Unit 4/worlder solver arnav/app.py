@@ -63,7 +63,7 @@ def get_words(index_color_letter_information):
             worlde_information["grey_not_acceptable_values"].add(leter)
 
     gray_only_letters = (worlde_information["grey_not_acceptable_values"] - worlde_information["part_of_wordle_word_set"])
-
+     
     words_possible = set()
     for word in words:
         wd = word.lower()

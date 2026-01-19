@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if not started %}
+  <div class="room">
+    <h2>Start</h2>
+    <p>You’re trapped in a digital museum. Solve the exhibits before the timer hits zero.</p>
+
+    <form method="POST" action="/">
+      <label>Your name:</label>
+      <input type="text" name="name">
+
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+
+      <button type="submit">Start</button>
+    </form>
+  </div>
+
+{% else %}
+
+  <!-- STAGE 1: PIANO -->
+  <div class="room">
+    <h2>1) Music Exhibit</h2>
+    <div class="card">
+      <p class="plaque">
+        “The lock listens to what you <b>press</b>, not what you click.”<br>
+        “Play the museum’s opening chord: <b>A S D</b>.”
+      </p>
+      <button id="openPiano" type="button">Inspect Piano</button>
+
+      {% if locks.piano %}
+        <p class="success">Unlocked.</p>
+      {% else %}
+        <p>Locked.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- STAGE 2: MEMORY -->
+  <div class="room">
+    <h2>2) Memory Exhibit</h2>
+    <div class="card">
+      <p>Memory Calibration Console</p>
+      <button id="openMemory" type="button" {% if not locks.piano %}disabled{% endif %}>Start Memory Test</button>
+
+      {% if locks.memory %}
+        <p class="success">Unlocked.</p>
+      {% else %}
+        <p>{% if locks.piano %}Ready.{% else %}Locked until Piano solved.{% endif %}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- STAGE 3: REBUS -->
+  <div class="room">
+    <h2>3) Rebus Exhibit</h2>
+    <div class="card">
+      <p>A framed hint waits on the wall.</p>
+      <button id="openRebus" type="button" {% if not locks.memory %}disabled{% endif %}>Examine Rebus</button>
+
+      {% if locks.rebus %}
+        <p class="success">Unlocked.</p>
+      {% else %}
+        <p>{% if locks.memory %}Locked.{% else %}Locked until Memory solved.{% endif %}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- STAGE 4: CONNECTIONS -->
+  <div class="room">
+    <h2>4) Blank Wall</h2>
+    <div class="card">
+      <p class="plaque">
+        The curator loved a daily puzzle where you find hidden groupings.<br>
+        (It’s the one with 4 groups of 4… but here you’ll do <b>THREES</b>.)
+      </p>
+
+      <button id="openConn" type="button" {% if not locks.rebus %}disabled{% endif %}>Inspect Wall</button>
+
+      {% if locks.connections %}
+        <p class="success">All groups found. The keypad activates.</p>
+
+        <form method="POST" action="{{ url_for('escape_check') }}">
+          <label>Enter 4-digit code:</label>
+          <input type="text" name="final_code">
+          {% if final_error %}
+            <p class="error">{{ final_error }}</p>
+          {% endif %}
+          <button type="submit">Escape</button>
+        </form>
+      {% else %}
+        <p>{% if locks.rebus %}Locked.{% else %}Locked until Rebus solved.{% endif %}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- PIANO MODAL -->
+  <div id="pianoModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closePiano">&times;</span>
+      <h3>Piano Lock</h3>
+      <p>Press keys in order: A → S → D</p>
+
+      <div class="svg-wrap">
+        <svg id="pianoSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120">
+          <rect id="keyA" x="10"  y="20" width="80" height="80" stroke="black" fill="white"></rect>
+          <rect id="keyS" x="110" y="20" width="80" height="80" stroke="black" fill="white"></rect>
+          <rect id="keyD" x="210" y="20" width="80" height="80" stroke="black" fill="white"></rect>
+
+          <text x="50"  y="70" font-size="22" text-anchor="middle">A</text>
+          <text x="150" y="70" font-size="22" text-anchor="middle">S</text>
+          <text x="250" y="70" font-size="22" text-anchor="middle">D</text>
+        </svg>
+      </div>
+
+      <p id="pianoStatus">Waiting…</p>
+    </div>
+  </div>
+
+  <!-- MEMORY MODAL -->
+  <div id="memoryModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeMemory">&times;</span>
+      <h3>Memory Calibration</h3>
+
+      <div class="mem-box">
+        <div id="memDisplay" class="mem-display">----</div>
+        <button id="memStart" type="button">Start</button>
+        <input id="memInput" type="text" placeholder="Type here">
+        <button id="memSubmit" type="button">Submit</button>
+        <p id="memStatus"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- REBUS MODAL -->
+  <div id="rebusModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeRebus">&times;</span>
+      <h3>Rebus</h3>
+
+      <p style="font-size: 26px; text-align:center;">
+        🔗  +  🔗  +  🔗
+      </p>
+      <p style="text-align:center;">(One word)</p>
+
+      <form id="rebusForm" method="POST" action="{{ url_for('unlock_rebus') }}">
+        <label>Answer:</label>
+        <input type="text" name="rebus_answer" id="rebusAnswer">
+        <button type="submit">Submit</button>
+      </form>
+
+      <p id="rebusStatus"></p>
+    </div>
+  </div>
+
+  <!-- CONNECTIONS MODAL -->
+  <div id="connModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeConn">&times;</span>
+      <h3>Connections Wall</h3>
+      <p>Select 3 that belong together.</p>
+
+      <div class="conn-grid" id="connGrid">
+        {% for item in conn_items %}
+          <div class="conn-tile" data-item="{{ item.id }}">
+            <img src="{{ url_for('static', filename='images/' + item.file) }}" alt="{{ item.id }}">
+          </div>
+        {% endfor %}
+      </div>
+
+      <p>Selected: <span id="selCount">0</span>/3</p>
+      <button id="submitGroup" type="button" disabled>Submit Group</button>
+
+      <p id="connStatus"></p>
+      <p>Digits: <span id="digitsSlot">_ _ _ _</span></p>
+    </div>
+  </div>
+
+{% endif %}
+
+{% endblock %}
