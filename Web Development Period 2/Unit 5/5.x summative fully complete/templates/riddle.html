@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Escape Room</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="riddle-page">
+
+<img src="/static/images/riddle-room.webp" alt="Riddle Background" class="page-background">
+
+<header><h1>Escape Room</h1><div class="info-bar"><div>{% if session.player_name %}Player: {{ session.player_name }}{% endif %}</div><div id="timer" data-game-started="{{ 'yes' if game_started else 'no' }}" data-limit="{{ time_limit }}" data-start-time="{{ start_time }}">Time left: --</div></div></header>
+
+<div class="content-container"><div class="room">
+  <h2>Riddle Room</h2>
+  <div class="card">
+
+      <p style="font-size: 26px; text-align:center;">
+        🔗 + 🔗 + 🔗
+      </p>
+
+      <form method="POST" action="/rebus">
+        <label>Answer:</label>
+        <input type="text" name="rebus_answer" required>
+        {% if error %}
+          <p class="error">{{ error }}</p>
+        {% endif %}
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <a href="/reset">Restart</a>
+  </footer>
+</div>
+
+<script src="/static/game.js"></script>
+</body>
+</html>

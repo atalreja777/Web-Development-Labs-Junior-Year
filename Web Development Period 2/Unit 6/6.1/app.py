@@ -8,7 +8,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# 1) Root page shows links to every hero
+
 @app.route('/')
 def index():
     conn = get_db_connection()
@@ -17,15 +17,11 @@ def index():
 
     return render_template("characters.html", characters=character_data)
 
-# 2) Parametric page: stats for one hero
-# REQUIRED: must use WHERE + ? notation (no SELECT * without WHERE)
+
 @app.route('/hero/<c_id>')
 def hero(c_id):
     conn = get_db_connection()
-    character_data = conn.execute(
-        "SELECT * FROM characters WHERE c_id = ?",
-        (c_id,)
-    ).fetchall()
+    character_data = conn.execute("SELECT * FROM characters WHERE c_id = ?",(c_id,)).fetchall()
     conn.close()
 
     return render_template("hero.html", characters=character_data)

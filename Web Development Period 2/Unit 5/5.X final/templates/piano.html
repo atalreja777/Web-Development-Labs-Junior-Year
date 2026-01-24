@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="room">
+  <h2>Music Exhibit</h2>
+  <div class="card">
+    <form method="POST" action="{{ url_for('piano') }}" id="pianoForm">
+
+      <div class="svg-wrap">
+        <svg id="pianoSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120">
+          <rect id="keyA" x="10"  y="20" width="80" height="80" stroke="black" fill="white"></rect>
+          <rect id="keyS" x="110" y="20" width="80" height="80" stroke="black" fill="white"></rect>
+          <rect id="keyD" x="210" y="20" width="80" height="80" stroke="black" fill="white"></rect>
+
+          <text x="50"  y="70" font-size="22" text-anchor="middle">A</text>
+          <text x="150" y="70" font-size="22" text-anchor="middle">S</text>
+          <text x="250" y="70" font-size="22" text-anchor="middle">D</text>
+        </svg>
+      </div>
+
+      <p id="pianoStatus">Waiting…</p>
+      <button type="submit" id="unlockBtn" style="display:none;">Unlock Piano</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

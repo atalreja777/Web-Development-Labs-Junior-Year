@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Escape Room</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="piano-page">
+
+<img src="/static/images/piano-bg.webp" alt="Piano Background" class="page-background">
+
+<header><h1>Escape Room</h1><div class="info-bar"><div>{% if session.player_name %}Player: {{ session.player_name }}{% endif %}</div><div id="timer" data-game-started="{{ 'yes' if game_started else 'no' }}" data-limit="{{ time_limit }}" data-start-time="{{ start_time }}">Time left: --</div></div></header>
+
+<div class="content-container"><div class="room">
+<h2>Music Room</h2><img src="/static/images/piano-bg.webp" alt="Piano Background" class="page-background"><div class="card"><p>The piano has 88 keys. If you play every other key starting from C, what note do you play on the 13th key?</p><p><em>(Hint: C, D, E, F, G, A, B, C...)</em></p><form method="POST" action="/piano"><label for="piano_answer">13th key note:</label><input type="text" id="piano-answer" name="piano_answer" placeholder="Enter note (A, B, C, D, E, F, G)" required maxlength="1" style="text-transform: uppercase"><button type="submit">Submit Answer</button></form>{% if error %}<p class="error">{{ error }}</p>{% endif %}</div></div><footer><a href="/reset">Restart</a></footer>
+</div>
+
+<script src="/static/game.js"></script>
+</body>
+</html>

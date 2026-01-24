@@ -2,8 +2,10 @@
 
 {% block content %}
 <div class="room">
-  <h2>Game Over</h2>
-  <p>You ran out of time.</p>
-  <a href="{{ url_for('reset') }}">Try Again</a>
+    <h2>Game Over</h2>
+    <p>
+        The teacher came back and caught you.
+    </p>
+    <a href="{{ url_for('reset') }}">Try Again</a>
 </div>
 {% endblock %}

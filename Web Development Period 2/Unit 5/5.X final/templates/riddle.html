@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="room">
+  <h2>Riddle Room</h2>
+  <div class="card">
+
+    <p style="font-size: 26px; text-align:center;">
+      🔗 + 🔗 + 🔗
+    </p>
+
+    <form method="POST" action="{{ url_for('rebus') }}">
+      <label>Answer:</label>
+      <input type="text" name="rebus_answer" required>
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if not started %}
+  <div class="room">
+    <h2>Start</h2>
+    <p>You’re trapped in a digital museum. Solve the exhibits before the timer hits zero.</p>
+
+    <form method="POST" action="/">
+      <label>Your name:</label>
+      <input type="text" name="name">
+
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+
+      <button type="submit">Start</button>
+    </form>
+  </div>
+
+{% else %}
+
+  <div class="room">
+    <h2>1. Music Exhibit</h2>
+    <div class="card">
+      <a href="{{ url_for('piano') }}"><button type="button">Enter Piano Room</button></a>
+
+      {% if locks.piano %}
+        <p class="success">Unlocked.</p>
+      {% else %}
+        <p>Locked.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="room">
+    <h2>2. Memory Exhibit</h2>
+    <div class="card">
+      {% if locks.piano %}
+        <a href="{{ url_for('memory') }}"><button type="button">Enter Memory Room</button></a>
+        {% if locks.memory %}
+          <p class="success">Unlocked.</p>
+        {% else %}
+          <p>Ready.</p>
+        {% endif %}
+      {% else %}
+        <p>Locked until Piano solved.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="room">
+    <h2>3. Riddle Room</h2>
+    <div class="card">
+      {% if locks.memory %}
+        <a href="{{ url_for('rebus') }}"><button type="button">Enter Riddle Room</button></a>
+        {% if locks.rebus %}
+          <p class="success">Unlocked.</p>
+        {% else %}
+          <p>Locked.</p>
+        {% endif %}
+      {% else %}
+        <p>Locked until Memory solved.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="room">
+    <h2>4. Blank Wall</h2>
+    <div class="card">
+      {% if locks.rebus %}
+        <a href="{{ url_for('connections') }}"><button type="button">Enter Connections Room</button></a>
+        {% if locks.connections %}
+          <p class="success">All groups found. The keypad activates.</p>
+
+          <form method="POST" action="{{ url_for('escape_check') }}">
+            <label>Enter 4-digit code:</label>
+            <input type="text" name="final_code">
+            {% if final_error %}
+              <p class="error">{{ final_error }}</p>
+            {% endif %}
+            <button type="submit">Escape</button>
+          </form>
+        {% else %}
+          <p>Locked.</p>
+        {% endif %}
+      {% else %}
+        <p>Locked until Riddle solved.</p>
+      {% endif %}
+    </div>
+  </div>
+
+
+{% endif %}
+
+{% endblock %}

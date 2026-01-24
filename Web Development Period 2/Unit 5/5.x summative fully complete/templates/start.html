@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Escape Room</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="start-page">
+
+<header>
+  <h1>Escape Room</h1>
+</header>
+
+<div class="content-container-start">
+  <div class="room">
+    <h2>Start</h2>
+    <p>You're trapped in an escape room. Solve the rooms (timed).</p>
+
+    <form method="POST" action="/">
+      <label>Your name:</label>
+      <input type="text" name="name">
+
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+
+      <button type="submit">Start</button>
+    </form>
+  </div>
+</div>
+
+<script src="/static/game.js"></script>
+</body>
+</html>

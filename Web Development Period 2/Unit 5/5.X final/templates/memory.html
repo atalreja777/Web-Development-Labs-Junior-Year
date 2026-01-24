@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="room">
+  <h2>Memory Exhibit</h2>
+  <div class="card">
+    <p>Memory Calibration Console</p>
+
+    <form method="POST" action="{{ url_for('memory') }}" id="memoryForm">
+      <div class="mem-box">
+        <div id="memDisplay" class="mem-display">----</div>
+        <button id="memStart" type="button">Start</button>
+        <input id="memInput" type="text" placeholder="Type here">
+        <button id="memSubmit" type="button">Submit</button>
+        <p id="memStatus"></p>
+      </div>
+      <button type="submit" id="completeBtn" style="display:none;">Complete Memory Test</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

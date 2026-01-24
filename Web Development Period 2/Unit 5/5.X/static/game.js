@@ -1,313 +1,82 @@
 document.addEventListener("DOMContentLoaded", function () {
-  setupTimer();
-
-  // modals
-  setupModal("openPiano", "pianoModal", "closePiano");
-  setupModal("openMemory", "memoryModal", "closeMemory");
-  setupModal("openRebus", "rebusModal", "closeRebus");
-  setupModal("openConn", "connModal", "closeConn");
-
-  // puzzles
-  setupPianoPuzzle();
-  setupMemoryPuzzle();
-  setupRebusPuzzle();
-  setupConnectionsPuzzle();
+    setupTimer();
+    setupStereo();
+    setupPoster();
 });
 
 function setupTimer() {
-  const timerEl = document.getElementById("timer");
-  if (!timerEl) return;
+    const timerEl = document.getElementById("timer");
+    if (!timerEl) return;
 
-  const started = timerEl.dataset.gameStarted === "yes";
-  if (!started) {
-    timerEl.textContent = "Time left: --";
-    return;
-  }
+    const limit = parseInt(timerEl.dataset.limit || "0");
 
-  function updateTimer() {
-    fetch("/time_status")
-      .then((res) => res.json())
-      .then((data) => {
-        const remaining = data.remaining;
-        timerEl.textContent = "Time left: " + formatTime(remaining);
-        if (remaining <= 0) {
-          window.location.href = "/game_over";
-        }
-      });
-  }
+    const started = timerEl.dataset.gameStarted === "yes";
 
-  updateTimer();
-  setInterval(updateTimer, 1000);
+    if (!started) {
+        timerEl.textContent = "Time left: --";
+        return;
+    }
+
+    function updateTimer() {
+        fetch("/time_status")
+            .then((res) => res.json())
+            .then((data) => {
+                const remaining = data.remaining;
+                timerEl.textContent = "Time left: " + formatTime(remaining);
+
+                if (remaining <= 0) {
+                    window.location.href = "/game_over";
+                }
+            })
+            .catch((err) => {
+                console.log("timer error", err);
+            });
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
 }
 
 function formatTime(seconds) {
-  const s = Math.max(0, seconds);
-  const mins = Math.floor(s / 60);
-  const secs = s % 60;
-  return mins + ":" + (secs < 10 ? "0" + secs : secs);
+    const s = Math.max(0, seconds);
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return mins + ":" + (secs < 10 ? "0" + secs : secs);
 }
 
-/* ===== W3Schools Modal Convention ===== */
-function setupModal(openBtnId, modalId, closeId) {
-  const btn = document.getElementById(openBtnId);
-  const modal = document.getElementById(modalId);
-  const close = document.getElementById(closeId);
-  if (!modal) return;
+function setupStereo() {
+    const btn = document.getElementById("stereo-btn");
+    const text = document.getElementById("stereo-text");
 
-  if (btn) {
-    btn.onclick = function () {
-      modal.style.display = "block";
-    };
-  }
+    if (!btn || !text) return;
 
-  if (close) {
-    close.onclick = function () {
-      modal.style.display = "none";
-    };
-  }
-
-  window.addEventListener("click", function (event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  });
-}
-
-/* ===== Puzzle 1: Piano (keydown only) ===== */
-function setupPianoPuzzle() {
-  const status = document.getElementById("pianoStatus");
-  if (!status) return;
-
-  const seq = ["a", "s", "d"];
-  let idx = 0;
-
-  document.addEventListener("keydown", function (ev) {
-    const modal = document.getElementById("pianoModal");
-    if (!modal || modal.style.display !== "block") return;
-
-    const k = ev.key.toLowerCase();
-    if (k !== "a" && k !== "s" && k !== "d") return;
-
-    flashKey(k);
-
-    if (k === seq[idx]) {
-      idx++;
-      status.textContent = "Good… (" + idx + "/" + seq.length + ")";
-      if (idx === seq.length) {
-        status.textContent = "Unlocked!";
-        fetch("/unlock/piano")
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.ok) window.location.reload();
-          });
-      }
-    } else {
-      idx = 0;
-      status.textContent = "Wrong order. Restart.";
-    }
-  });
-}
-
-function flashKey(letter) {
-  const map = { a: "keyA", s: "keyS", d: "keyD" };
-  const id = map[letter];
-  const rect = document.getElementById(id);
-  if (!rect) return;
-
-  rect.setAttribute("fill", "lightgreen");
-  setTimeout(() => {
-    rect.setAttribute("fill", "white");
-  }, 200);
-}
-
-/* ===== Puzzle 2: Memory 1..7 ===== */
-function setupMemoryPuzzle() {
-  const display = document.getElementById("memDisplay");
-  const startBtn = document.getElementById("memStart");
-  const input = document.getElementById("memInput");
-  const submit = document.getElementById("memSubmit");
-  const status = document.getElementById("memStatus");
-  if (!display || !startBtn || !input || !submit || !status) return;
-
-  let level = 1;
-  let current = "";
-
-  function randDigits(n) {
-    let s = "";
-    for (let i = 0; i < n; i++) {
-      s += Math.floor(Math.random() * 10);
-    }
-    return s;
-  }
-
-  function showLevel() {
-    current = randDigits(level);
-    display.textContent = current;
-    status.textContent = "Memorize " + level + " digit(s).";
-    input.value = "";
-    setTimeout(() => {
-      display.textContent = "####";
-    }, 800);
-  }
-
-  startBtn.onclick = function () {
-    level = 1;
-    showLevel();
-  };
-
-  submit.onclick = function () {
-    const guess = input.value.trim();
-    if (guess === current) {
-      level++;
-      if (level === 8) {
-        status.textContent = "Calibration complete: MUSEUM";
-        fetch("/unlock/memory")
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.ok) window.location.reload();
-          });
-        return;
-      }
-      status.textContent = "Correct. Next.";
-      showLevel();
-    } else {
-      status.textContent = "Incorrect — restarting.";
-      level = 1;
-      showLevel();
-    }
-  };
-}
-
-/* ===== Puzzle 3: Rebus (form but handled with fetch) ===== */
-function setupRebusPuzzle() {
-  const form = document.getElementById("rebusForm");
-  const status = document.getElementById("rebusStatus");
-  if (!form || !status) return;
-
-  form.onsubmit = function () {
-    status.textContent = "";
-    const fd = new FormData(form);
-
-    fetch("/unlock/rebus", {
-      method: "POST",
-      body: fd
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.ok) {
-          status.textContent = "Unlocked!";
-          window.location.reload();
-        } else {
-          status.textContent = "Wrong.";
-        }
-      });
-
-    return false;
-  };
-}
-
-/* ===== Puzzle 4: Connections (images use your PNG names) ===== */
-function setupConnectionsPuzzle() {
-  const grid = document.getElementById("connGrid");
-  const selCount = document.getElementById("selCount");
-  const submitBtn = document.getElementById("submitGroup");
-  const status = document.getElementById("connStatus");
-  const digitsSlot = document.getElementById("digitsSlot");
-  if (!grid || !selCount || !submitBtn || !status || !digitsSlot) return;
-
-  // groups are based on your filenames/ids
-  const groups = [
-    { ids: ["coffee", "tea", "soda"], digit: "4" },
-    { ids: ["guitar", "piano", "drums"], digit: "5" },
-    { ids: ["hat", "shirt", "shoe"], digit: "3" },
-    { ids: ["sun", "moon", "star"], digit: "1" },
-  ];
-
-  let selected = [];
-  let locked = new Set();
-  let digits = [];
-
-  function renderDigits() {
-    let out = "_ _ _ _";
-    if (digits.length > 0) {
-      out = digits.join(" ") + " " + "_ ".repeat(4 - digits.length).trim();
-    }
-    digitsSlot.textContent = out.trim();
-  }
-
-  function updateUI() {
-    selCount.textContent = selected.length;
-    submitBtn.disabled = (selected.length !== 3);
-  }
-
-  Array.from(grid.querySelectorAll(".conn-tile")).forEach((tile) => {
-    tile.onclick = function () {
-      const id = tile.dataset.item;
-      if (locked.has(id)) return;
-
-      if (selected.includes(id)) {
-        selected = selected.filter(x => x !== id);
-        tile.classList.remove("selected");
-      } else {
-        if (selected.length === 3) return;
-        selected.push(id);
-        tile.classList.add("selected");
-      }
-      updateUI();
-    };
-  });
-
-  submitBtn.onclick = function () {
-    if (selected.length !== 3) return;
-
-    let found = null;
-    for (let i = 0; i < groups.length; i++) {
-      const g = groups[i];
-      const a = selected.slice().sort().join(",");
-      const b = g.ids.slice().sort().join(",");
-      if (a === b) {
-        found = g;
-        break;
-      }
-    }
-
-    if (!found) {
-      status.textContent = "Not a group.";
-      // unselect
-      Array.from(grid.querySelectorAll(".conn-tile")).forEach((tile) => {
-        tile.classList.remove("selected");
-      });
-      selected = [];
-      updateUI();
-      return;
-    }
-
-    // lock them
-    found.ids.forEach((id) => {
-      locked.add(id);
-      const tile = grid.querySelector(`.conn-tile[data-item="${id}"]`);
-      if (tile) {
-        tile.classList.remove("selected");
-        tile.classList.add("locked");
-      }
+    btn.addEventListener("click", function () {
+        text.textContent =
+            "You press play. A chiptune beat starts blasting. " +
+            "The tiny display on the stereo says: 'NOW PLAYING: RETRO MODE'.";
     });
+}
 
-    digits.push(found.digit);
-    status.textContent = "Correct. Digit: " + found.digit;
-    selected = [];
-    updateUI();
-    renderDigits();
+function setupPoster() {
+    const poster = document.getElementById("poster");
+    const posterText = document.getElementById("poster-text");
 
-    if (digits.length === 4) {
-      status.textContent = "All groups found. Keypad activated.";
-      fetch("/unlock/connections")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.ok) window.location.reload();
-        });
-    }
-  };
+    if (!poster || !posterText) return;
 
-  updateUI();
-  renderDigits();
+    let clicks = 0;
+
+    poster.addEventListener("click", function () {
+        clicks += 1;
+
+        if (clicks < 5) {
+            posterText.textContent =
+                "The cat's eyes seem to follow you. (Clicks: " + clicks + ")";
+        } else if (clicks < 10) {
+            posterText.textContent =
+                "Something shiny appears under the poster... keep tapping. (Clicks: " + clicks + ")";
+        } else {
+            posterText.textContent =
+                "The poster rips slightly and you see numbers written on the wall: 4 5 3 1.";
+        }
+    });
 }

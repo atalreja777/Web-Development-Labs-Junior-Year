@@ -2,14 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import time
 
 app = Flask(__name__)
-app.secret_key = "escape-room-secret"
+app.secret_key = "secret-key"
 
 TIME_LIMIT_SECONDS = 300
 
 
 def get_time_info():
     if "start_time" not in session:
-        return 0, TIME_LIMIT_SECONDS
+        return 0, 0
     elapsed = int(time.time() - session["start_time"])
     remaining = max(0, TIME_LIMIT_SECONDS - elapsed)
     return elapsed, remaining
@@ -18,214 +18,168 @@ def get_time_info():
 def get_locks():
     locks = session.get("locks")
     if locks is None:
-        locks = {"piano": False, "memory": False, "rebus": False, "connections": False}
+        locks = {
+            "drawer": False,
+            "door": False
+        }
         session["locks"] = locks
     return locks
 
 
-def time_guard():
-    elapsed, remaining = get_time_info()
-    if session.get("game_started") != True:
-        return False, elapsed, remaining
-    if remaining <= 0:
-        return False, elapsed, remaining
-    return True, elapsed, remaining
-
-
-CONN_ITEMS = [
-    {"id": "coffee", "file": "coffee.png"},
-    {"id": "tea", "file": "tea.png"},
-    {"id": "soda", "file": "soda.png"},
-    {"id": "guitar", "file": "guitar.png"},
-    {"id": "piano", "file": "piano.png"},
-    {"id": "drums", "file": "drums.png"},
-    {"id": "hat", "file": "hat.png"},
-    {"id": "shirt", "file": "shirt.png"},
-    {"id": "shoe", "file": "shoe.png"},
-    {"id": "sun", "file": "sun.png"},
-    {"id": "moon", "file": "moon.png"},
-    {"id": "star", "file": "star.png"},
-]
-
-
 @app.route("/", methods=["GET", "POST"])
-def start():
-    # start screen is on / (as you requested)
+def index():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         if not name:
+            elapsed, remaining = get_time_info()
             return render_template(
-                "game.html",
-                started=False,
-                error="Type your name to start.",
-                locks=get_locks(),
+                "index.html",
+                error="Please type your name to start.",
+                elapsed=elapsed,
+                remaining=remaining,
                 time_limit=TIME_LIMIT_SECONDS,
                 game_started=session.get("game_started", False),
-                conn_items=CONN_ITEMS,
-                final_error=None,
+                body_class="bg-index",
             )
 
         session.clear()
         session["player_name"] = name
         session["start_time"] = time.time()
         session["game_started"] = True
-        session["locks"] = {"piano": False, "memory": False, "rebus": False, "connections": False}
-        session.modified = True
-        return redirect(url_for("game"))
-
-    # GET
-    return render_template(
-        "game.html",
-        started=False,
-        error=None,
-        locks=get_locks(),
-        time_limit=TIME_LIMIT_SECONDS,
-        game_started=session.get("game_started", False),
-        conn_items=CONN_ITEMS,
-        final_error=None,
-    )
-
-
-@app.route("/game")
-def game():
-    if session.get("game_started") != True:
-        return redirect(url_for("start"))
-
-    ok, elapsed, remaining = time_guard()
-    if not ok:
-        return redirect(url_for("game_over"))
-
-    locks = get_locks()
-
-    final_error = None
-    if request.args.get("final") == "bad":
-        final_error = "Wrong code."
-
-    return render_template(
-        "game.html",
-        started=True,
-        error=None,
-        locks=locks,
-        time_limit=TIME_LIMIT_SECONDS,
-        game_started=session.get("game_started", False),
-        conn_items=CONN_ITEMS,
-        final_error=final_error,
-    )
-
-
-@app.route("/unlock/piano")
-def unlock_piano():
-    if session.get("game_started") != True:
-        return jsonify({"ok": False})
-
-    ok, elapsed, remaining = time_guard()
-    if not ok:
-        return jsonify({"ok": False, "reason": "time"})
-
-    locks = get_locks()
-    locks["piano"] = True
-    session["locks"] = locks
-    session.modified = True
-    return jsonify({"ok": True})
-
-
-@app.route("/unlock/memory")
-def unlock_memory():
-    if session.get("game_started") != True:
-        return jsonify({"ok": False})
-
-    ok, elapsed, remaining = time_guard()
-    if not ok:
-        return jsonify({"ok": False, "reason": "time"})
-
-    locks = get_locks()
-    if locks.get("piano") != True:
-        return jsonify({"ok": False, "reason": "needs_piano"})
-
-    locks["memory"] = True
-    session["locks"] = locks
-    session.modified = True
-    return jsonify({"ok": True})
-
-
-@app.route("/unlock/rebus", methods=["POST"])
-def unlock_rebus():
-    if session.get("game_started") != True:
-        return jsonify({"ok": False})
-
-    ok, elapsed, remaining = time_guard()
-    if not ok:
-        return jsonify({"ok": False, "reason": "time"})
-
-    locks = get_locks()
-    if locks.get("memory") != True:
-        return jsonify({"ok": False, "reason": "needs_memory"})
-
-    ans = request.form.get("rebus_answer", "").strip().lower()
-    if ans != "connections":
-        return jsonify({"ok": False, "reason": "wrong"})
-
-    locks["rebus"] = True
-    session["locks"] = locks
-    session.modified = True
-    return jsonify({"ok": True})
-
-
-@app.route("/unlock/connections")
-def unlock_connections():
-    if session.get("game_started") != True:
-        return jsonify({"ok": False})
-
-    ok, elapsed, remaining = time_guard()
-    if not ok:
-        return jsonify({"ok": False, "reason": "time"})
-
-    locks = get_locks()
-    if locks.get("rebus") != True:
-        return jsonify({"ok": False, "reason": "needs_rebus"})
-
-    locks["connections"] = True
-    session["locks"] = locks
-    session.modified = True
-    return jsonify({"ok": True})
-
-
-@app.route("/escape_check", methods=["POST"])
-def escape_check():
-    if session.get("game_started") != True:
-        return redirect(url_for("start"))
-
-    ok, elapsed, remaining = time_guard()
-    if not ok:
-        return redirect(url_for("game_over"))
-
-    locks = get_locks()
-    if locks.get("connections") != True:
-        return redirect(url_for("game"))
-
-    code = request.form.get("final_code", "").strip()
-    if code == "4531":
-        return redirect(url_for("victory"))
-    return redirect(url_for("game", final="bad"))
-
-
-@app.route("/victory")
-def victory():
-    if session.get("game_started") != True:
-        return redirect(url_for("start"))
+        session["locks"] = {
+            "drawer": False,
+            "door": False
+        }
+        return redirect(url_for("lab"))
 
     elapsed, remaining = get_time_info()
-    locks = get_locks()
-    if locks.get("connections") != True:
-        return redirect(url_for("game"))
+    return render_template(
+        "index.html",
+        error=None,
+        elapsed=elapsed,
+        remaining=remaining,
+        time_limit=TIME_LIMIT_SECONDS,
+        game_started=session.get("game_started", False),
+        body_class="bg-index",
+    )
+
+
+@app.route("/lab")
+def lab():
+    if "player_name" not in session:
+        return redirect(url_for("index"))
+
+    elapsed, remaining = get_time_info()
     if remaining <= 0:
         return redirect(url_for("game_over"))
 
+    locks = get_locks()
+    error = None
+    if request.args.get("error") == "wrong_drawer":
+        error = "That code didn't work. The drawer stays locked."
+
     return render_template(
-        "victory.html",
+        "lab.html",
+        locks=locks,
+        error=error,
         elapsed=elapsed,
+        remaining=remaining,
         time_limit=TIME_LIMIT_SECONDS,
         game_started=session.get("game_started", False),
+        body_class="bg-lab",
+    )
+
+
+@app.route("/unlock_drawer", methods=["POST"])
+def unlock_drawer():
+    if "player_name" not in session:
+        return redirect(url_for("index"))
+
+    elapsed, remaining = get_time_info()
+    if remaining <= 0:
+        return redirect(url_for("game_over"))
+
+    code = request.form.get("drawer_code", "").strip().lower()
+    if code == "retro":
+        locks = get_locks()
+        locks["drawer"] = True
+        session["locks"] = locks
+        return redirect(url_for("lab"))
+    else:
+        return redirect(url_for("lab", error="wrong_drawer"))
+
+
+@app.route("/hallway")
+def hallway():
+    if "player_name" not in session:
+        return redirect(url_for("index"))
+
+    elapsed, remaining = get_time_info()
+    if remaining <= 0:
+        return redirect(url_for("game_over"))
+
+    locks = get_locks()
+    if not locks.get("drawer"):
+        return redirect(url_for("lab"))
+
+    error = None
+    if request.args.get("error") == "wrong_door":
+        error = "The lock beeps angrily. Wrong number."
+
+    return render_template(
+        "hallway.html",
+        locks=locks,
+        error=error,
+        elapsed=elapsed,
+        remaining=remaining,
+        time_limit=TIME_LIMIT_SECONDS,
+        game_started=session.get("game_started", False),
+        body_class="bg-hallway",
+    )
+
+
+@app.route("/door_lock", methods=["POST"])
+def door_lock():
+    if "player_name" not in session:
+        return redirect(url_for("index"))
+
+    elapsed, remaining = get_time_info()
+    if remaining <= 0:
+        return redirect(url_for("game_over"))
+
+    locks = get_locks()
+    if not locks.get("drawer"):
+        return redirect(url_for("lab"))
+
+    code = request.form.get("door_code", "").strip()
+    if code == "4531":
+        locks["door"] = True
+        session["locks"] = locks
+        return redirect(url_for("vault"))
+    else:
+        return redirect(url_for("hallway", error="wrong_door"))
+
+
+@app.route("/vault")
+def vault():
+    if "player_name" not in session:
+        return redirect(url_for("index"))
+
+    elapsed, remaining = get_time_info()
+    if remaining <= 0:
+        return redirect(url_for("game_over"))
+
+    locks = get_locks()
+    if not locks.get("door"):
+        return redirect(url_for("hallway"))
+
+    return render_template(
+        "vault.html",
+        elapsed=elapsed,
+        remaining=remaining,
+        time_limit=TIME_LIMIT_SECONDS,
+        game_started=session.get("game_started", False),
+        body_class="bg-vault",
     )
 
 
@@ -235,22 +189,30 @@ def game_over():
     return render_template(
         "game_over.html",
         elapsed=elapsed,
+        remaining=remaining,
         time_limit=TIME_LIMIT_SECONDS,
         game_started=session.get("game_started", False),
+        body_class="bg-gameover",
     )
 
 
 @app.route("/time_status")
 def time_status():
     elapsed, remaining = get_time_info()
-    return jsonify({"elapsed": elapsed, "remaining": remaining, "limit": TIME_LIMIT_SECONDS})
+    return jsonify(
+        {
+            "elapsed": elapsed,
+            "remaining": remaining,
+            "limit": TIME_LIMIT_SECONDS,
+        }
+    )
 
 
 @app.route("/reset")
 def reset():
     session.clear()
-    return redirect(url_for("start"))
+    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(debug=True)

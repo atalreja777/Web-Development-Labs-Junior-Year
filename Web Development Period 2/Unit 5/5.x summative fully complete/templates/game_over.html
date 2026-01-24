@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Escape Room</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="game-over-page">
+
+<header>
+  <h1>Escape Room</h1>
+
+  <div class="info-bar">
+    <div>
+      {% if session.player_name %}
+        Player: {{ session.player_name }}
+      {% endif %}
+    </div>
+
+    <div id="timer"
+         data-game-started="{{ 'yes' if game_started else 'no' }}"
+         data-limit="{{ time_limit }}"
+         data-start-time="{{ start_time }}">
+      Time left: --
+    </div>
+  </div>
+</header>
+
+<div class="content-container">
+  <div class="room">
+    <h2>Game Over</h2>
+    <p>You ran out of time.</p>
+    <a href="/reset">Try Again</a>
+  </div>
+
+  <footer>
+    <a href="/reset">Restart</a>
+  </footer>
+</div>
+
+<script src="/static/game.js"></script>
+</body>
+</html>

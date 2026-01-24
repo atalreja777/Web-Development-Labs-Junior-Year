@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Escape Room</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="memory-page">
+
+<img src="/static/images/memory-room.png" alt="Memory Background" class="page-background">
+
+<header>
+  <h1>Escape Room</h1>
+  <div class="info-bar">
+    <div>{% if session.player_name %}Player: {{ session.player_name }}{% endif %}</div>
+    <div id="timer" data-game-started="{{ 'yes' if game_started else 'no' }}" data-limit="{{ time_limit }}" data-start-time="{{ start_time }}">Time left: --</div>
+  </div>
+</header>
+
+<div class="content-container">
+  <div class="room">
+    <h2>Memory Room</h2>
+    <div class="card">
+      <p>Memory Calibration Console</p>
+      <form method="POST" action="/memory" id="memory-form">
+        <div class="mem-box">
+          <div id="mem-display" class="mem-display">----</div>
+          <button id="mem-start" type="button">Start</button>
+          <input id="mem-input" type="text" placeholder="Type here">
+          <button id="mem-submit" type="button">Submit</button>
+          <p id="mem-status"></p>
+        </div>
+        <button type="submit" id="complete-btn" style="display: none">Submit</button>
+      </form>
+      <div id="final-code-section" style="margin-top: 20px;">
+        <p id="code-display" style="display: none;">CODE: <strong>MUSEUM</strong></p>
+        <form method="POST" action="/memory">
+          <input type="text" id="final-code-input" name="final_code">
+          <button type="submit">Submit Code</button>
+        </form>
+        {% if error %}
+          <p class="error">{{ error }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <footer>
+    <a href="/reset">Restart</a>
+  </footer>
+</div>
+
+<script src="/static/game.js"></script>
+</body>
+</html>
