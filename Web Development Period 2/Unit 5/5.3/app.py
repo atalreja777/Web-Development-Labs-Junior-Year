@@ -7,7 +7,7 @@ app.secret_key = "abc123"
 
 with open('credentials.json', 'r') as file:
     credentials = json.load(file)
-
+    
 def using_hashlib(test_string):
     b_teststring = test_string.encode('utf-8') 
     sha_obj = hashlib.sha256()                 
@@ -27,9 +27,9 @@ def login():
     password = request.form.get("password", "")
 
     hashedPwrd= using_hashlib(password)
-    stored = credentials.get(user)
+    storred = credentials.get(user)
 
-    if stored != None and stored == hashedPwrd:
+    if storred != None and storred == hashedPwrd:
         session["logged_in"] = True
         session["user"] = user
         return redirect(url_for("home"))

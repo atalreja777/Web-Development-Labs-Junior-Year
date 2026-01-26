@@ -16,7 +16,6 @@ CREATE TABLE checkouts (
   co_checkout TEXT,
   co_checkin TEXT,
   co_fines REAL,
-  FOREIGN KEY (b_id) REFERENCES books (b_id)
 );
 
 INSERT INTO books

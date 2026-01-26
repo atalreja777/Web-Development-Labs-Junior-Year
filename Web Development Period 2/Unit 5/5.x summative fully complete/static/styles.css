@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-family: "Times New Roman";
 }
 
 .page-background {
@@ -152,6 +152,7 @@ footer {
   text-align: center;
   cursor: pointer;
   background: white;
+  border: 2px solid transparent;
 }
 
 .conn-tile img {

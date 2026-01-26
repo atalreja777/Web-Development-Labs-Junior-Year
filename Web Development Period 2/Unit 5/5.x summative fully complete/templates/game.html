@@ -25,7 +25,7 @@
 <div class="content-container">
 
   <div class="room">
-    <h2>1) Music Room</h2>
+    <h2>1. Music Room</h2>
     <div class="card">
       <a href="/piano"><button type="button">Enter Piano Room</button></a>
 
@@ -38,7 +38,7 @@
   </div>
 
   <div class="room">
-    <h2>2) Memory Room</h2>
+    <h2>2. Memory Room</h2>
     <div class="card">
       {% if locks.piano %}
         <a href="/memory"><button type="button">Enter Memory Room</button></a>
@@ -54,7 +54,7 @@
   </div>
 
   <div class="room">
-    <h2>3) Riddle Room</h2>
+    <h2>3. Riddle Room</h2>
     <div class="card">
       {% if locks.memory %}
         <a href="/rebus"><button type="button">Enter Riddle Room</button></a>
@@ -70,7 +70,7 @@
   </div>
 
   <div class="room">
-    <h2>4) Blank Wall</h2>
+    <h2>4. Blank Wall</h2>
     <div class="card">
       {% if locks.rebus %}
         <a href="/connections"><button type="button">Enter Connections Room</button></a>

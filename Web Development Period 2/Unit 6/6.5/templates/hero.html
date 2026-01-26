@@ -20,6 +20,19 @@
       <div>Defense: {{ c['c_defense'] }}</div>
       <div>Magic: {{ c['c_magic'] }}</div>
     </div>
+
+    <hr>
+
+   
+    <form action="/updating_smth" method="POST">
+     
+      <input type="hidden" name="c_id" value="{{ c['c_id'] }}">
+
+      <label>IF you need pls update the strength value using this thing below.....</label><br>
+      <input type="text" name="f_strength" value="{{ c['c_strength'] }}">
+      <input type="submit" value="Press this button in order to update the strength">
+    </form>
+
   {% endfor %}
 
 </body>

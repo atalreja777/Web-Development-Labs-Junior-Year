@@ -32,9 +32,9 @@ function setupTimer() {
     const elapsed = Math.floor(now - serverStartTime);
     const remaining = Math.max(0, timeLimit - elapsed);
 
-    timerEl.textContent = "Time left: " + formatTime(remaining);
+    timerEl.textContent = "Time left: "+formatTime(remaining);
     if (remaining <= 0 && shouldRedirect) {
-      window.location.href = "/game_over";
+      window.location.href ="/game_over";
     }
   }
 
@@ -43,23 +43,22 @@ function setupTimer() {
 }
 
 function formatTime(seconds) {
-  const s = Math.max(0, seconds);
-  const mins = Math.floor(s / 60);
-  const secs = s % 60;
-  return mins + ":" + (secs < 10 ? "0" + secs : secs);
+  const s =Math.max(0, seconds);
+  const mins= Math.floor(s / 60);
+  const secs= s % 60;
+  return mins+ ":" +(secs < 10 ? "0" + secs : secs);
 }
 
-
 function setupMemoryPuzzle() {
-  const display = document.getElementById("mem-display");
-  const startBtn = document.getElementById("mem-start");
-  const input = document.getElementById("mem-input");
-  const submit = document.getElementById("mem-submit");
-  const status = document.getElementById("mem-status");
-  const form = document.getElementById("memory-form");
-  const completeBtn = document.getElementById("complete-btn");
-  const finalCodeSection = document.getElementById("final-code-section");
-  const codeDisplay = document.getElementById("code-display");
+  const display =document.getElementById("mem-display");
+  const startBtn= document.getElementById("mem-start");
+  const input =document.getElementById("mem-input");
+  const submit= document.getElementById("mem-submit");
+  const status=document.getElementById("mem-status");
+  const form=document.getElementById("memory-form");
+  const completeBtn=document.getElementById("complete-btn");
+  const finalCodeSection= document.getElementById("final-code-section");
+  const codeDisplay =document.getElementById("code-display");
   if (!display || !startBtn || !input || !submit || !status || !form) return;
 
   input.addEventListener("keydown", function(e) {
@@ -84,10 +83,10 @@ function setupMemoryPuzzle() {
     display.textContent = current;
     status.textContent = "Memorize " + level + " digit(s).";
     input.value = "";
-    const displayTime = Math.max(300, 800 - (level * 50));
+    const disT = Math.max(300, 800 - (level * 50));
     setTimeout(() => {
       display.textContent = "####";
-    }, displayTime);
+    }, disT);
   }
 
   startBtn.addEventListener("click", function () {
@@ -106,7 +105,7 @@ function setupMemoryPuzzle() {
       status.textContent = "Correct. Next.";
       showLevel();
     } else {
-      status.textContent = "Incorrect — restarting.";
+      status.textContent = "Incorrect, you now have to restart as you got it WRONG.";
       level = 1;
       showLevel();
     }
@@ -133,23 +132,23 @@ function setupConnectionsPuzzle() {
   const completeBtn = document.getElementById("complete-btn");
   if (!grid || !selCount || !submitBtn || !status || !digitsSlot || !form) return;
 
+ 
   const groups = [
-    { ids: ["coffee", "tea", "soda"], digit: "4" },
-    { ids: ["guitar", "piano", "drums"], digit: "5" },
-    { ids: ["hat", "shirt", "shoe"], digit: "3" },
-    { ids: ["sun", "moon", "star"], digit: "1" },
+    { ids: ["coffee", "tea", "soda"], digit: "4", pos: 0 },
+    { ids: ["guitar", "piano", "drums"], digit: "5", pos: 1 },
+    { ids: ["hat", "shirt", "shoe"], digit: "3", pos: 2 },
+    { ids: ["sun", "moon", "star"], digit: "1", pos: 3 },
   ];
 
   let selected = [];
   let locked = new Set();
-  let digits = [];
 
+  
+  let spotsForPassword = ["_", "_", "_", "_"];
+
+  
   function renderDigits() {
-    let out = "_ _ _ _";
-    if (digits.length > 0) {
-      out = digits.join(" ") + " " + "_ ".repeat(4 - digits.length).trim();
-    }
-    digitsSlot.textContent = out.trim();
+    digitsSlot.textContent = spotsForPassword.join(" ");
   }
 
   function updateUI() {
@@ -190,7 +189,6 @@ function setupConnectionsPuzzle() {
 
     if (!found) {
       status.textContent = "Not a group.";
-      // unselect
       Array.from(grid.querySelectorAll(".conn-tile")).forEach((tile) => {
         tile.classList.remove("selected");
       });
@@ -199,7 +197,7 @@ function setupConnectionsPuzzle() {
       return;
     }
 
-    // lock them
+
     found.ids.forEach((id) => {
       locked.add(id);
       const tile = grid.querySelector(`.conn-tile[data-item="${id}"]`);
@@ -209,14 +207,17 @@ function setupConnectionsPuzzle() {
       }
     });
 
-    digits.push(found.digit);
-    status.textContent = "Correct. Digit: " + found.digit;
+   
+    spotsForPassword[found.pos] = found.digit;
+
+    status.textContent = "Correct. Code: " + spotsForPassword.join("");
     selected = [];
     updateUI();
     renderDigits();
 
-    if (digits.length === 4) {
-      status.textContent = "All groups found. Keypad activated.";
+    
+    if (!spotsForPassword.includes("_")) {
+      status.textContent = "Seems like connections was too easy 4 u. DO U REMEMBER THE CODE IT GAVE YOU THOGUGH?";
       completeBtn.style.display = "block";
     }
   });
